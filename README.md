@@ -1,6 +1,8 @@
 [![Build and Deploy](https://github.com/Exoldy/a-philosophy-of-software-design/actions/workflows/deploy.yml/badge.svg)](https://github.com/Exoldy/a-philosophy-of-software-design/actions/workflows/deploy.yml)
 
-## A Philosophy of Software Design, 2nd Edition
+# **ФИЛОСОФИЯ ДИЗАЙНА СОФТА**
+### **Издание 2-е**
+**(Исправленное, дополненное, и с надеждой, что хоть со второго раза до вас дойдёт)**
 
 Онлайн-версия: https://Exoldy.github.io/a-philosophy-of-software-design/
 
