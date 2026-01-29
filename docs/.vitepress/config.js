@@ -1,8 +1,8 @@
 export default {
     appearance: true,
     base: '/a-philosophy-of-software-design/',
-    lang: 'zh-CN',
-    title: '软件设计哲学',
+    lang: 'ru-RU',
+    title: 'Философия дизайна ПО',
     lastUpdated: true,
     themeConfig: {
         sidebar: [{
@@ -34,10 +34,10 @@ export default {
             ]
         }],
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/lamb/a-philosophy-of-software-design/' }
+            { icon: 'github', link: 'https://github.com/Exoldy/a-philosophy-of-software-design/' }
         ],
         editLink: {
-            pattern: 'https://github.com/lamb/a-philosophy-of-software-design/edit/master/docs/:path',
+            pattern: 'https://github.com/Exoldy/a-philosophy-of-software-design/edit/main/docs/:path',
             text: 'Edit this page on GitHub'
         }
     },
