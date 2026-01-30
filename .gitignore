@@ -4,3 +4,4 @@ package-lock.json
 .vscode
 .yarn
 docs/.vitepress/dist
+translate.mjs

@@ -1,58 +1,63 @@
-# Chapter 12 Why Write Comments? The Four Excuses
+# **Глава 12. Нахуя писать комменты? Четыре тупые отмазки**
 
-In-code documentation plays a crucial role in software design. Comments are essential to help developers understand a system and work efficiently, but the role of comments goes beyond this. Documentation also plays an important role in abstraction; without comments, you can’t hide complexity. Finally, the process of writing comments, if done correctly, will actually improve a system’s design. Conversely, a good software design loses much of its value if it is poorly documented.
+Документация в коде — это не просто "желательно", это, блядь, фундамент дизайна софта. Комментарии нужны не только для того, чтобы коллеги не проклинали тебя, пытаясь понять твой код, но и для **абстракции**. Без нормальных комментов ты не спрячешь сложность: кишки реализации будут торчать наружу. И наконец, если писать комменты правильно (а не для галочки), это улучшает сам дизайн системы. И наоборот: даже гениальная архитектура превращается в тыкву, если она задокументирована через жопу.
 
-Unfortunately, this view is not universally shared. A significant fraction of production code contains essentially no comments. Many developers think that comments are a waste of time; others see the value in comments, but somehow never get around to writing them. Fortunately, many development teams recognize the value of documentation, and it feels like the prevalence of these teams is gradually increasing. However, even in teams that encourage documentation, comments are often viewed as drudge work and many developers don’t understand how to write them, so the resulting documentation is often mediocre. Inadequate documentation creates a huge and unnecessary drag on software development.
+К сожалению, не все разделяют этот взгляд. Огромная часть продакшн-кода вообще не содержит комментариев. Многие разрабы считают, что это пустая трата времени; другие вроде и понимают пользу, но вечно "не успевают". К счастью, команд, которые выкупают фишку документации, становится больше. Но даже там комменты часто воспринимают как унылую барщину, и пишут их так, что лучше бы не писали вовсе. Хреновая документация — это тормоз, который тянет разработку на дно.
 
-In this chapter I will discuss the excuses developers use to avoid writing comments, and the reasons why comments really do matter. Chapter 13 will then describe how to write good comments and the next few chapters after that will discuss related issues such as choosing variable names and how to use documentation to improve a system’s design. I hope these chapters will convince you of three things: good comments can make a big difference in the overall quality of software; it isn’t hard to write good comments; and (this may be hard to believe) writing comments can actually be fun.
+В этой главе я разберу гнилые отмазки, которыми разработчики оправдывают свою лень, и объясню, почему комменты реально решают. В главе 13 я расскажу, как писать комменты, от которых не вытекают глаза, а дальше мы поговорим про нейминг и про то, как доки спасают дизайн. Надеюсь убедить вас в трех вещах: хорошие комменты бустят качество софта; писать их не сложно; и (звучит как бред, но) это может быть даже весело.
 
-When developers don’t write comments, they usually justify their behavior with one or more of the following excuses:
+Когда разрабы не пишут комменты, они обычно прикрываются одной из этих мантр:
 
-- “Good code is self-documenting.”
-- “I don’t have time to write comments.”
-- “Comments get out of date and become misleading.”
-- “The comments I have seen are all worthless; why bother?” In the sections below I will address each of these excuses in turn.
+*   «Хороший код документирует сам себя».
+*   «У меня нет времени на писанину».
+*   «Комменты устаревают и начинают пиздеть».
+*   «Всё, что я видел — бесполезный мусор, нахера плодить сущности?»
 
----
-
-## 12.1 Good code is self-documenting
-
-Some people believe that if code is written well, it is so obvious that no comments are needed. This is a delicious myth, like a rumor that ice cream is good for your health: we’d really like to believe it! Unfortunately, it’s simply not true. To be sure, there are things you can do when writing code to reduce the need for comments, such as choosing good variable names (see Chapter 14). Nonetheless, there is still a significant amount of design information that can’t be represented in code. For example, only a small part of a class’s interface, such as the signatures of its methods, can be specified formally in the code. The informal aspects of an interface, such as a high-level description of what each method does or the meaning of its result, can only be described in comments. There are many other examples of things that can’t be described in the code, such as the rationale for a particular design decision, or the conditions under which it makes sense to call a particular method.
-
-Some developers argue that if others want to know what a method does, they should just read the code of the method: this will be more accurate than any comment. It’s possible that a reader could deduce the abstract interface of the method by reading its code, but it would be time-consuming and painful. In addition, if you write code with the expectation that users will read method implementations, you will try to make each method as short as possible, so that it’s easy to read. If the method does anything nontrivial, you will break it up into several smaller methods. This will result in a large number of shallow methods. Furthermore, it doesn’t really make the code easier to read: in order to understand the behavior of the top-level method, readers will probably need to understand the behaviors of the nested methods. For large systems it isn’t practical for users to read the code to learn the behavior.
-
-Moreover, comments are fundamental to abstractions. Recall from Chapter 4 that the goal of abstractions is to hide complexity: an abstraction is a simplified view of an entity, which preserves essential information but omits details that can safely be ignored. If users must read the code of a method in order to use it, then there is no abstraction: all of the complexity of the method is exposed. Without comments, the only abstraction of a method is its declaration, which specifies its name and the names and types of its arguments and results. The declaration is missing too much essential information to provide a useful abstraction by itself. For example, a method to extract a substring might have two arguments, start and end, indicating the range of characters to extract. From the declaration alone, it isn’t possible to tell whether the extracted substring will include the character indicated by end, or what happens if start > end. Comments allow us to capture the additional information that callers need, thereby completing the simplified view while hiding implementation details. It’s also important that comments are written in a human language such as English; this makes them less precise than code, but it provides more expressive power, so we can create simple, intuitive descriptions. If you want to use abstractions to hide complexity, comments are essential.
-
-## 12.2 I don’t have time to write comments
-
-It’s tempting to prioritize comments lower than other development tasks. Given a choice between adding a new feature and documenting an existing feature, it seems logical to choose the new feature. However, software projects are almost always under time pressure, and there will always be things that seem higher priority than writing comments. Thus, if you allow documentation to be de-prioritized, you’ll end up with no documentation.
-
-The counter-argument to this excuse is the investment mindset discussed on page 15. If you want a clean software structure, which will allow you to work efficiently over the long-term, then you must take some extra time up front in order to create that structure. Good comments make a huge difference in the maintainability of software, so the effort spent on them will pay for itself quickly. Furthermore, writing comments needn’t take a lot of time. Ask yourself how much of your development time you spend typing in code (as opposed to designing, compiling, testing, etc.), assuming you don’t include any comments; I doubt that the answer is more than 10%. Now suppose that you spend as much time typing comments as typing code; this should be a safe upper bound. With these assumptions, writing good comments won’t add more than about 10% to your development time. The benefits of having good documentation will quickly offset this cost.
-
-Furthermore, many of the most important comments are those related to abstractions, such as the top-level documentation for classes and methods. Chapter 15 will argue that these comments should be written as part of the design process, and that the act of writing the documentation serves as an important design tool that improves the overall design. These comments pay for themselves immediately.
-
-## 12.3 Comments get out of date and become misleading
-
-Comments do sometimes get out of date, but this need not be a major problem in practice. Keeping documentation up-to-date does not require an enormous effort. Large changes to the documentation are only required if there have been large changes to the code, and the code changes will take more time than the documentation changes. Chapter 16 discusses how to organize documentation so that it is as easy as possible to keep it updated after code modifications (the key ideas are to avoid duplicated documentation and keep the documentation close to the corresponding code). Code reviews provide a great mechanism for detecting and fixing stale comments.
-
-## 12.4 All the comments I have seen are worthless
-
-Of the four excuses, this is probably the one with the most merit. Every software developer has seen comments that provide no useful information, and most existing documentation is so-so at best. Fortunately, this problem is solvable; writing solid documentation is not hard, once you know how. The next chapters will lay out a framework for how to write good documentation and maintain it over time.
-
-## 12.5 Benefits of well-written comments
-
-Now that I have discussed (and, hopefully, debunked) the arguments against writing comments, let’s consider the benefits that you will get from good comments. The overall idea behind comments is to capture information that was in the mind of the designer but couldn’t be represented in the code. This information ranges from low-level details, such as a hardware quirk that motivates a particularly tricky piece of code, up to high-level concepts such as the rationale for a class. When other developers come along later to make modifications, the comments will allow them to work more quickly and accurately. Without documentation, future developers will have to rederive or guess at the developer’s original knowledge; this will take additional time, and there is a risk of bugs if the new developer misunderstands the original designer’s intentions. Comments are valuable even when the original designer is the one making the changes: if it has been more than a few weeks since you last worked in a piece of code, you will have forgotten many of the details of the original design.
-
-Chapter 2 described three ways in which complexity manifests itself in software systems:
-
-- Change amplification: a seemingly simple change requires code modifications in many places.
-- Cognitive load: in order to make a change, the developer must accumulate a large amount of information.
-- Unknown unknowns: it is unclear what code needs to be modified, or what information must be considered in order to make those modifications.
+Ниже я разнесу каждую из этих отмазок по фактам.
 
 ---
 
-Good documentation helps with the last two of these issues. Documentation can reduce cognitive load by providing developers with the information they need to make changes and by making it easy for developers to ignore information that is irrelevant. Without adequate documentation, developers may have to read large amounts of code to reconstruct what was in the designer’s mind. Documentation can also reduce the unknown unknowns by clarifying the structure of the system, so that it is clear what information and code is relevant for any given change.
+## 12.1 Хороший код документирует сам себя (Классический пиздёж)
 
-Chapter 2 pointed out that the primary causes of complexity are dependencies and obscurity. Good documentation can clarify dependencies, and it fills in gaps to eliminate obscurity.
+Некоторые свято верят, что если код написан "чисто", то он настолько очевиден, что комменты не нужны. Это сладкий миф, вроде того, что от пива не толстеют: очень хочется верить, но, сука, это неправда. Конечно, можно и нужно выбирать нормальные имена переменных (см. Главу 14), чтобы снизить потребность в пояснениях. Но есть куча инфы по дизайну, которую тупо невозможно выразить кодом. Например, сигнатура метода — это лишь верхушка айсберга. А вот неформальные аспекты — что метод реально делает, в чём суть результата — живут только в комментах. Почему было принято именно такое архитектурное решение? При каких условиях этот метод вообще можно дёргать? Код тебе этого не скажет.
 
-The next few chapters will show you how to write good documentation. They will also discuss how to integrate documentation-writing into the design process so that it improves the design of your software.
+Некоторые умники говорят: "Хочешь понять, что делает метод? Прочитай его код, это точнее любого коммента". В теории — да, можно декомпилировать логику в голове, читая исходники, но это долго и больно. К тому же, если ты пишешь код с расчетом на то, что кто-то будет читать твои "кишки", ты начнешь дробить методы на мелкие куски. В итоге получишь кучу поверхностных методов-однострочников. Читать это легче не станет: чтобы понять общую картину, придется прыгать по вложенным методам как сайгак. Для больших систем читать код, чтобы понять поведение — это утопия.
+
+Более того, **комменты — это клей для абстракции**. Вспомним главу 4: цель абстракции — скрыть сложность. Абстракция — это упрощенный вид сущности, где мы оставляем суть, но выкидываем детали, на которые можно забить. Если пользователю нужно читать код метода, чтобы его использовать — **абстракции нет**, ты всё проебал, сложность вывалена наружу. Без комментов единственная абстракция — это объявление метода (типы аргументов и имя). Этого ничтожно мало.
+
+Пример: метод `substring(start, end)`. Из сигнатуры ни хера не понятно: входит ли символ под индексом `end` в результат? А что если `start > end`? Всё упадет или вернется пустая строка? Комменты позволяют описать эти нюансы, скрывая реализацию. И важно, что комменты пишутся на человеческом языке (английском, русском — похер), что дает нам выразительную мощь для простых и понятных объяснений. Хочешь нормальные абстракции — пиши, блядь, комменты.
+
+## 12.2 У меня нет времени (Отмазка для ленивых)
+
+Конечно, велик соблазн забить на доки ради новых фич. Если стоит выбор: "запилить новую кнопку" или "описать старую", логично выбрать кнопку. Проекты всегда горят, дедлайны жмут. Но если ты позволишь документации стать задачей "второго сорта", ты останешься без документации вообще.
+
+Контраргумент тут простой — **инвестиционный подход** (см. стр. 15). Хочешь, чтобы система не превратилась в легаси-помойку и позволяла работать быстро в долгую? Потрать время сейчас. Хорошие комменты окупаются мгновенно за счет упрощения поддержки.
+
+И давай честно: это не занимает много времени. Сколько ты реально *печатаешь* код? Процентов 10 от рабочего времени. Остальное — это "думать", "тупить", "компилять", "тестить". Даже если ты будешь тратить на комменты столько же времени, сколько на код (что дохера), это увеличит общее время разработки всего на 10%. Профит от того, что ты не будешь потом часами вспоминать "что это за хуйня", перекроет эти затраты с лихвой.
+
+Самые важные комменты (описание классов и методов) вообще должны писаться *во время* дизайна (см. Глава 15). Это помогает структурировать мысли, так что они окупаются еще до того, как ты написал первую строчку кода.
+
+## 12.3 Комменты устаревают и начинают пиздеть
+
+Да, комменты могут протухнуть. Но это не катастрофа мирового масштаба. Поддерживать их актуальными не так уж сложно. Большие правки в доках нужны только при больших изменениях в коде (а код менять всё равно дольше). В Главе 16 я расскажу, как писать так, чтобы обновлять было легко (спойлер: не дублируй инфу и держи коммент рядом с кодом). А код-ревью — отличный повод дать по рукам тому, кто поменял логику, но забыл обновить описание.
+
+## 12.4 Все комменты, что я видел — бесполезное говно
+
+Из всех четырех отмазок — эта самая справедливая. Каждый разраб видел комменты типа `i++; // увеличиваем i на 1`, от которых хочется выколоть себе глаза. Большинство существующей документации — на троечку. Но это решаемо. Писать нормальные доки не сложно, если знать как. Следующие главы дадут тебе фреймворк, чтобы не быть мудаком и писать полезные вещи.
+
+## 12.5 Какой профит от нормальных комментов?
+
+Раз уж мы разнесли отмазки, давай о пользе. Главная идея: **захватить информацию, которая была в голове у архитектора, но не влезла в код**. Это может быть всё: от "почему мы используем этот грязный хак из-за бага в железе" до "какова вообще философия этого класса".
+
+Когда другой разраб (или ты сам через полгода, когда всё забудешь) полезет что-то менять, комменты помогут сделать это быстро и без багов. Без них придется гадать и реконструировать замысел, а это риск понять всё неправильно и навернуть говнокода.
+
+В Главе 2 мы говорили о трех всадниках апокалипсиса сложности:
+1.  **Лавинный эффект (Change amplification):** тронул тут — развалилось там.
+2.  **Когнитивная нагрузка (Cognitive load):** чтобы сделать правку, надо загрузить в мозг терабайт контекста.
+3.  **Неведомая ебанина (Unknown unknowns):** хрен знает, что менять и где рванёт.
+
+---
+
+Хорошая документация лечит последние два пункта. Она снижает когнитивную нагрузку, давая нужную инфу и позволяя игнорировать ненужную. Тебе не надо читать весь код, чтобы понять суть. И она устраняет "неведомую ебанину", проясняя структуру системы и зависимости.
+
+Короче, следующие главы научат тебя писать доки не как мудак, а как инженер, и встраивать этот процесс в дизайн так, чтобы твой софт не превращался в кусок говна.

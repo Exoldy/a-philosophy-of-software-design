@@ -1,48 +1,50 @@
-# Summary
+# **ИТОГИ**
 
-## Summary of Design Principles
+## **Заповеди нормального архитектора (Шпаргалка, чтобы не обосраться)**
 
-Here are the most important software design principles discussed in this book:
+Вот самые важные принципы дизайна софта из этой книги. Распечатай и повесь над монитором:
 
-1. Complexity is incremental: you have to sweat the small stuff (see p. 11).
-2. Working code isn’t enough (see p. 14).
-3. Make continual small investments to improve system design (see p. 15).
-4. Modules should be deep (see p. 22)
-5. Interfaces should be designed to make the most common usage as simple as possible (see p. 27).
-6. It’s more important for a module to have a simple interface than a simple implementation (see pp. 55, 71).
-7. General-purpose modules are deeper (see p. 39).
-8. Separate general-purpose and special-purpose code (see p. 62).
-9. Different layers should have different abstractions (see p. 45).
-10. Pull complexity downward (see p. 55).
-11. Define errors (and special cases) out of existence (see p. 79).
-12. Design it twice (see p. 91).
-13. Comments should describe things that are not obvious from the code (see p. 101).
-14. Software should be designed for ease of reading, not ease of writing (see p. 149).
-15. The increments of software development should be abstractions, not features (see p. 154).
-
----
-
-## Summary of Red Flags
-
-Here are a few of of the most important red flags discussed in this book. The presence of any of these symptoms in a system suggests that there is a problem with the system’s design:
-
-- Shallow Module: the interface for a class or method isn’t much simpler than its implementation (see pp. 25, 110).
-- Information Leakage: a design decision is reflected in multiple modules (see p. 31).
-- Temporal Decomposition: the code structure is based on the order in which operations are executed, not on information hiding (see p. 32).
-- Overexposure: An API forces callers to be aware of rarely used features in order to use commonly used features (see p. 36).
-- Pass-Through Method: a method does almost nothing except pass its arguments to another method with a similar signature (see p. 46).
-- Repetition: a nontrivial piece of code is repeated over and over (see p. 62).
-- Special-General Mixture: special-purpose code is not cleanly separated from general purpose code (see p. 65).
-- Conjoined Methods: two methods have so many dependencies that its hard to understand the implementation of one without understanding the implementation of the other (see p. 72).
-- Comment Repeats Code: all of the information in a comment is immediately obvious from the code next to the comment (see p. 104).
-- Implementation Documentation Contaminates Interface: an interface comment describes implementation details not needed by users of the thing being documented (see p. 114).
-- Vague Name: the name of a variable or method is so imprecise that it doesn’t convey much useful information (see p. 123).
-- Hard to Pick Name: it is difficult to come up with a precise and intuitive name for an entity (see p. 125).
-- Hard to Describe: in order to be complete, the documentation for a variable or method must be long. (see p. 131).
-- Nonobvious Code: the behavior or meaning of a piece of code cannot be understood easily. (see p. 148).
+1.  **Сложность растёт как снежный ком:** забей хуй на мелочи сегодня, и завтра этот ком тебя раздавит (см. стр. 11).
+2.  **«Оно работает» — это не оправдание.** Это, блять, необходимый минимум, а не достижение (см. стр. 14).
+3.  **Инвестируй в дизайн постоянно.** По чуть-чуть, каждый день, а не устраивай героические субботники раз в год (см. стр. 15).
+4.  **Модули должны быть глубокими.** Мощный функционал за узким интерфейсом, а не наоборот (см. стр. 22).
+5.  **Интерфейсы должны быть простыми.** Сделай так, чтобы типичную задачу мог решить даже джун с похмелья, не заглядывая в мануал (см. стр. 27).
+6.  **Простой интерфейс важнее простой реализации.** Пусть внутри творится ад и содомия, но снаружи всё должно быть красиво и понятно (см. стр. 55, 71).
+7.  **Универсальные модули — глубже.** Чем абстрактнее херня, тем она полезнее в хозяйстве (см. стр. 39).
+8.  **Мухи — отдельно, котлеты — отдельно.** Не мешай код общего назначения со специфическим бизнес-говном (см. стр. 62).
+9.  **Разные слои — разные абстракции.** Не надо гонять одни и те же данные туда-сюда, меняя только название переменной (см. стр. 45).
+10. **Спускай сложность вниз.** Пусть страдает модуль, а не тот, кто его вызывает (см. стр. 55).
+11. **Уничтожай ошибки на этапе дизайна.** Спроектируй так, чтобы корнер-кейсов тупо не могло возникнуть. Нет ошибки — нет эксепшена (см. стр. 79).
+12. **Спроектируй дважды.** Первое решение, которое пришло тебе в голову, скорее всего — говно. Смирись и переделай (см. стр. 91).
+13. **Комменты должны объяснять то, чего нет в коде.** Не пиши «i++ // увеличиваем i», за это в приличных домах бьют канделябром (см. стр. 101).
+14. **Код должен легко читаться, а не легко писаться.** Тебе его писать один раз, а читать — сотни. Пожалей глаза коллег (см. стр. 149).
+15. **Развивай проект абстракциями, а не фичами.** Не будь «фиче-клепателем», будь инженером (см. стр. 154).
 
 ---
 
-## About the Author
+## **Красные флаги (Симптомы того, что ты кодишь как мудак)**
 
-John Ousterhout is the Bosack Lerner Professor of Computer Science at Stanford University. He is the creator of the Tcl scripting language and is also well known for his work in distributed operating systems and storage systems. Ousterhout received a BS degree in Physics from Yale University and a PhD in Computer Science from Carnegie Mellon University. He is a member of the National Academy of Engineering and has received numerous awards, including the ACM Software System Award, the ACM Grace Murray Hopper Award, the National Science Foundation Presidential Young Investigator Award, and the U.C. Berkeley Distinguished Teaching Award.
+Если видишь что-то из этого списка в своём проекте — у меня для тебя плохие новости, дизайн прогнил:
+
+*   **Мелкий модуль (Shallow Module):** Интерфейс класса такой же сложный, как и его реализация. Пользы ноль, геморроя много (см. стр. 25, 110).
+*   **Протечка информации (Information Leakage):** Одно дизайнерское решение размазано тонким слоем по нескольким модулям. Поменял в одном месте — всё наебнулось в трех других (см. стр. 31).
+*   **Временнáя декомпозиция (Temporal Decomposition):** Код разбит по принципу «сначала делаем это, потом то», а не по смыслу. Привет, процедурное программирование из 80-х (см. стр. 32).
+*   **Эксгибиционизм (Overexposure):** API заставляет юзера знать о какой-то редкой, никому не нужной херне, просто чтобы вызвать базовую функцию (см. стр. 36).
+*   **Метод-перекладыватель (Pass-Through Method):** Метод, который не делает нихуя, кроме как пинает аргументы соседнему методу. Бесполезная прокладка (см. стр. 46).
+*   **Копипаста (Repetition):** Нетривиальный кусок кода повторяется снова и снова. DRY, сука, Do You Speak It? (см. стр. 62).
+*   **Винегрет (Special-General Mixture):** Специализированный код свален в кучу с общим. Разгребать это — отдельный вид пытки (см. стр. 65).
+*   **Сиамские близнецы (Conjoined Methods):** Два метода так сплелись зависимостями, что хер поймешь один без другого (см. стр. 72).
+*   **Капитан Очевидность (Comment Repeats Code):** В комменте написано ровно то же самое, что и в коде рядом. Спасибо, кэп (см. стр. 104).
+*   **Спойлеры реализации (Implementation Documentation Contaminates Interface):** В доке к интерфейсу описано, как оно работает внутри. Юзеру похуй на твои кишки, не грузи его (см. стр. 114).
+*   **Мутное имя (Vague Name):** Название переменной или метода настолько расплывчатое, что не несет никакой инфы. `data`, `handle`, `manager` — я смотрю на вас (см. стр. 123).
+*   **Нейминг не идет (Hard to Pick Name):** Если не можешь нормально назвать сущность — значит, ты сам не понимаешь, на кой хер она нужна, или она делает слишком дохера всего (см. стр. 125).
+*   **Хрен опишешь (Hard to Describe):** Если документация к методу занимает больше места, чем сам метод, значит дизайн — говно (см. стр. 131).
+*   **Магия (Nonobvious Code):** Код работает, но никто, блять, не понимает как. Поведение неочевидно (см. стр. 148).
+
+---
+
+## **Об авторе (Кто этот мощный старик?)**
+
+**Джон Оустерхаут** — профессор Computer Science в Стэнфорде, не хрен с горы. Отец-основатель скриптового языка Tcl (да, того самого, про который ты слышал от седобородых админов) и собаку съел на распределенных операционках и системах хранения.
+
+У мужика бакалавр по физике из Йеля и PhD по Computer Science из Карнеги-Меллон. Короче, умнее нас всех вместе взятых. Член Национальной инженерной академии, обвешан наградами как новогодняя ёлка: ACM Software System Award, премия имени Грейс Мюррей Хоппер и прочие ачивки, которые тебе не светят.

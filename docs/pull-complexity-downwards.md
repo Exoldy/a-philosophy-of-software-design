@@ -1,33 +1,73 @@
-# Chapter 8 Pull Complexity Downwards
+# **Глава 8. Утаскивай сложность на дно**
 
-This chapter introduces another way of thinking about how to create deeper classes. Suppose that you are developing a new module, and you discover a piece of unavoidable complexity. Which is better: should you let users of the module deal with the complexity, or should you handle the complexity internally within the module? If the complexity is related to the functionality provided by the module, then the second answer is usually the right one. Most modules have more users than developers, so it is better for the developers to suffer than the users. As a module developer, you should strive to make life as easy as possible for the users of your module, even if that means extra work for you. Another way of expressing this idea is that it is more important for a module to have a simple interface than a simple implementation.
+### **(Или «Страдай сам, чтобы другим было по кайфу»)**
 
-As a developer, it’s tempting to behave in the opposite fashion: solve the easy problems and punt the hard ones to someone else. If a condition arises that you’re not certain how to deal with, the easiest thing is to throw an exception and let the caller handle it. If you are not certain what policy to implement, you can define a few configuration parameters to control the policy and leave it up to the system administrator to figure out the best values for them.
+В этой главе мы поговорим о еще одном способе делать классы «глубокими», а не поверхностными пустышками. Допустим, ты пилишь новый модуль и наткнулся на кусок неизбежной, лютой ебанины (сложности). Возникает вопрос: вывалить эту сложность на тех, кто будет юзать твой модуль, или молча разгрести это дерьмо внутри?
 
-Approaches like these will make your life easier in the short term, but they amplify complexity, so that many people must deal with a problem, rather than just one person. For example, if a class throws an exception, every caller of the class will have to deal with it. If a class exports configuration parameters, every system administrator in every installation will have to learn how to set them.
+Если эта сложность хоть как-то касается функционала твоего модуля, то правильный ответ почти всегда второй. У большинства модулей пользователей (других разрабов) больше, чем авторов. Поэтому, с точки зрения гуманизма и здравого смысла, **лучше пусть пострадает один разраб (ты), чем будут вечно мучиться все пользователи твоего кода**.
 
-## 8.1 Example: editor text class
+Твоя задача как создателя модуля — сделать жизнь юзера максимально сладкой, даже если ради этого тебе придется попотеть и написать пару лишних сотен строк. Перефразируя: **простой интерфейс важнее простой реализации**.
 
-Consider the class that manages the text of a file for a GUI text editor, which was discussed in Chapters 6 and 7. The class provides methods to read a file from disk into memory, query and modify the in-memory copy of the file, and write the modified version back to disk. When students had to implement this class, many of them chose a line-oriented interface, with methods to read, insert, and delete whole lines of text. This resulted in a simple implementation for the class, but it created complexity for higher level software. At the level of the user interface, operations rarely involve whole lines. For example, keystrokes cause individual characters to be inserted within an existing line; copying or deleting the selection can modify parts of several different lines. With the line-oriented text interface, higher-level software had to split and join lines in order to implement the user interface.
+Но мы же знаем, как работают программисты. Соблазн сделать наоборот велик: решить простые задачки, а сложные — спихнуть на соседа.
+*   Не знаешь, как обработать ситуацию? Кидай `Exception`, пусть вызывающий код ебётся.
+*   Не уверен, какую политику выбрать? Заведи пару параметров в конфиге, пусть сисадмин гадает, какие значения туда вписать.
 
-A character-oriented interface such as the one described in Section 6.3 pulls complexity downward. The user interface software can now insert and delete arbitrary ranges of text without splitting and merging lines, so it becomes simpler. The implementation of the text class probably becomes more complex: if it represents the text internally as a collection of lines, it will have to split and merge lines to implement the character-oriented operations. This approach is better because it encapsulates the complexity of splitting and merging within the text class, which reduces the overall complexity of the system.
+Такой подход облегчит твою жизнь здесь и сейчас, но в долгосроке это увеличивает энтропию и пиздец во всей системе. Вместо того чтобы проблему решил один человек (ты), с ней теперь будет трахаться каждый, кто вызовет твой метод. Если класс плюется исключениями, каждый вызов превращается в `try-catch` ад. Если класс требует настройки, каждый админ на каждой инсталляции будет гуглить мануалы.
 
-## 8.2 Example: configuration parameters
+---
 
-Configuration parameters are an example of moving complexity upwards instead of down. Rather than determining a particular behavior internally, a class can export a few parameters that control its behavior, such as the size of a cache or the number of times to retry a request before giving up. Users of the class must then specify appropriate values for the parameters. Configuration parameters have become very popular in systems today; some systems have hundreds of them.
+## **8.1 Пример: Класс для текста в редакторе**
 
-Advocates argue that configuration parameters are good because they allow users to tune the system for their particular requirements and workloads. In some situations it is hard for low-level infrastructure code to know the best policy to apply, whereas users are much more familiar with their domains. For instance, a user might know that some requests are more time-critical than others, so it makes sense for the user to specify a higher priority for those requests. In situations like this, configuration parameters can result in better performance across a broader variety of domains.
+Вспомним тот класс для текстового редактора из глав 6 и 7. Он должен читать файл, держать его в памяти и сохранять обратно.
 
-However, configuration parameters also provide an easy excuse to avoid dealing with important issues and pass them on to someone else. In many cases, it’s difficult or impossible for users or administrators to determine the right values for the parameters. In other cases, the right values could have been determined automatically with a little extra work in the system implementation. Consider a network protocol that must deal with lost packets. If it sends a request but doesn’t receive a response within a certain time period, it resends the request. One way to determine the retry interval is to introduce a configuration parameter. However, the transport protocol could compute a reasonable value on its own by measuring the response time for requests that succeed and then using a multiple of this for the retry interval. This approach pulls complexity downward and saves users from having to figure out the right retry interval. It has the additional advantage of computing the retry interval dynamically, so it will adjust automatically if operating conditions change. In contrast, configuration parameters can easily become out of date.
+Когда студентам (читай: джунам) давали это задание, многие выбирали **построчный интерфейс**. Типа методы `readLine`, `insertLine`, `deleteLine`.
+Почему? Потому что реализовать такую шнягу проще пареной репы.
 
-Thus, you should avoid configuration parameters as much as possible. Before exporting a configuration parameter, ask yourself: “will users (or higher-level modules) be able to determine a better value than we can determine here?” When you do create configuration parameters, see if you can compute reasonable defaults automatically, so users will only need to provide values under exceptional conditions. Ideally, each module should solve a problem completely; configuration parameters result in an incomplete solution, which adds to system complexity.
+Но для того, кто пишет UI поверх этого класса, это **полный ад**.
+В интерфейсе операции редко касаются целых строк. Юзер нажал клавишу — надо вставить символ в середину строки. Юзер выделил текст и нажал Delete — это может затронуть куски трех разных строк.
+С «простым» построчным интерфейсом высокоуровневый код вынужден постоянно резать строки, склеивать их обратно и заниматься прочей акробатикой.
 
-## 8.3 Taking it too far
+А вот **посимвольный интерфейс** (как в разделе 6.3) — это пример того, как сложность утаскивается вниз. UI-код просто говорит: «удали текст с позиции А по позицию Б», и ему похер на строки. Жить стало проще.
+Да, реализация самого текстового класса стала сложнее: если внутри всё хранится как массив строк, тебе придется самому их резать и клеить. Но это **правильный подход**. Ты инкапсулируешь (прячешь) этот геморрой внутри класса, снижая общую сложность системы. Говно не плавает на поверхности, оно надежно спрятано в трубах.
 
-Use discretion when pulling complexity downward; this is an idea that can easily be overdone. An extreme approach would be to pull all of the functionality of the entire application down into a single class, which clearly doesn’t make sense. Pulling complexity down makes the most sense if (a) the complexity being pulled down is closely related to the class’s existing functionality, (b) pulling the complexity down will result in many simplifications elsewhere in the application, and (c) pulling the complexity down simplifies the class’s interface. Remember that the goal is to minimize overall system complexity.
+---
 
-Chapter 6 described how some students defined methods in the text class that reflected the user interface, such as a method that implements the functionality of the backspace key. It might seem that this is good, since it pulls complexity downward. However, adding knowledge of the user interface to the text class doesn’t simplify higher-level code very much, and the user-interface knowledge doesn’t relate to the core functions of the text class. In this case, pulling complexity down just resulted in information leakage.
+## **8.2 Пример: Параметры конфигурации**
 
-## 8.4 Conclusion
+Конфиги — это классический пример того, как сложность всплывает наверх, вместо того чтобы тонуть. Вместо того чтобы решить, как системе работать, класс говорит: «Я хз, вот вам параметры `cache_size` и `retry_count`, сами разбирайтесь».
+Сейчас модно делать системы с сотнями параметров.
 
-When developing a module, look for opportunities to take a little bit of extra suffering upon yourself in order to reduce the suffering of your users.
+Адепты этого подхода кукарекают, что это круто: мол, юзеры могут «тюнить» систему под себя. Иногда это правда — низкоуровневый код не может знать всё о контексте.
+Но будем честны: чаще всего конфиги — это просто **отмазка**, чтобы не решать сложные вопросы.
+
+В большинстве случаев юзеры (и даже админы) в душе не ебут, какие значения там выставлять.
+Часто правильные значения можно вычислить автоматически, если не лениться.
+
+Возьмем сетевой протокол. Пакеты теряются, надо делать повторную отправку (retry). Сколько ждать перед повтором?
+*   **Ленивый путь:** Сделать параметр `retry_interval` в конфиге. Пусть юзер гадает.
+*   **Нормальный путь:** Протокол сам замеряет время ответа успешных запросов и на основе этого динамически вычисляет таймаут.
+
+Второй подход утаскивает сложность вниз. Юзеру не надо думать. Более того, система адаптируется сама, если сеть начнет тупить. А жестко забитый конфиг устареет и станет бесполезным куском говна.
+
+**Совет:** Избегай конфигурационных параметров как чумы. Перед тем как добавить новый, спроси себя: «А юзер реально сможет определить это значение лучше, чем мой код?». Если уж приходится делать конфиг — сделай так, чтобы дефолтные значения работали в 99% случаев, и юзер лез туда только в случае ядерной войны.
+Идеальный модуль решает проблему целиком. Конфиги — это признак недоделанного решения.
+
+---
+
+## **8.3 Без фанатизма**
+
+Утаскивать сложность вниз надо с умом. Если перегнуть палку, можно получить «Божественный Объект» (God Class), который делает вообще всё. Это тоже дичь.
+
+Спускать сложность имеет смысл, если:
+а) Эта сложность тесно связана с функционалом класса.
+б) Это упростит жизнь всем остальным частям программы.
+в) Интерфейс класса станет чище.
+
+В главе 6 был пример, где студенты пихали в текстовый класс логику кнопки Backspace. Казалось бы — утащили сложность вниз? Нет, нихуя.
+Знание о том, как работает Backspace — это уровень UI. Пихая это в класс хранения данных, ты не упрощаешь систему, а смешиваешь слои ответственности. Это называется **утечка информации** (information leakage), и это плохо. Не надо путать «спрятать сложность реализации» и «свалить всё в одну кучу».
+
+---
+
+## **8.4 Итог**
+
+Когда пишешь модуль, ищи возможность взять на себя чуть больше страданий, чтобы твоим пользователям жилось чуть легче. Будь мужиком, разгреби сложность сам.

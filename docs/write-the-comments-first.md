@@ -1,54 +1,67 @@
-# Chapter 15 Write The Comments First(Use Comments As Part Of The Design Process)
+# **ГЛАВА 15. ПИШИ КОММЕНТЫ СНАЧАЛА**
 
-Many developers put off writing documentation until the end of the development process, after coding and unit testing are complete. This is one of the surest ways to produce poor quality documentation. The best time to write comments is at the beginning of the process, as you write the code. Writing the comments first makes documentation part of the design process. Not only does this produce better documentation, but it also produces better designs and it makes the process of writing documentation more enjoyable.
+### **(Используй их как инструмент дизайна, а не как повинность)**
 
-## 15.1 Delayed comments are bad comments
+Многие разработчики откладывают написание документации на самый конец, когда код уже написан и юнит-тесты (если они вообще есть) пройдены. Это, блять, самый надежный способ произвести на свет документацию качества «полное говно». Лучшее время писать комментарии — это в самом начале, пока ты еще только пишешь код. Если писать комменты первыми, документация становится частью процесса проектирования. Это не только дает на выходе нормальное описание, но и спасает твой дизайн от убогости, да и сам процесс становится чуть менее мучительным.
 
-Almost every developer I have ever met puts off writing comments. When asked why they don’t write documentation earlier, they say that the code is still changing. If they write documentation early, they say, they’ll have to rewrite it when the code changes; better to wait until the code stabilizes. However, I suspect that there is also another reason, which is that they view documentation as drudge work; thus, they put it off as long as possible.
+## **15.1 Отложенные комменты — это мертвые комменты**
 
-Unfortunately, this approach has several negative consequences. First, delaying documentation often means that it never gets written at all. Once you start delaying, it’s easy to delay a bit more; after all, the code will be even more stable in a few more weeks. By the time the code has inarguably stabilized, there is a lot of it, which means the task of writing documentation has become huge and even less attractive. There’s never a convenient time to stop for a few days and fill in all of the missing comments, and it’s easy to rationalize that the best thing for the project is to move on and fix bugs or write the next new feature. This will create even more undocumented code.
+Почти каждый разраб, которого я встречал, откладывает комменты на потом. Когда спрашиваешь этих гениев «почему бы не написать доку сразу?», они начинают ныть, что код, мол, еще меняется. Типа, если написать сейчас, потом придется переписывать; лучше подождать, пока код «стабилизируется». Но я подозреваю, что настоящая причина в другом: они считают документацию нудной ебаниной, поэтому оттягивают этот момент до последнего, как поход к стоматологу.
 
-Even if you do have the self-discipline to go back and write the comments (and don’t fool yourself: you probably don’t), the comments won’t be very good. By this time in the process, you have checked out mentally. In your mind, this piece of code is done; you are eager to move on to your next project. You know that writing comments is the right thing to do, but it’s no fun. You just want to get through it as quickly as possible. Thus, you make a quick pass over the code, adding just enough comments to look respectable. By now, it’s been a while since you designed the code, so your memories of the design process are becoming fuzzy. You look at the code as you are writing the comments, so the comments repeat the code. Even if you try to reconstruct the design ideas that aren’t obvious from the code, there will be things you don’t remember. Thus, the comments are missing some of the most important things they should describe.
+К сожалению, у такого подхода последствия печальные.
+Во-первых, откладывание доки обычно приводит к тому, что она **не пишется вообще**. Стоит только начать откладывать, и остановиться невозможно; ведь через пару недель код станет «еще стабильнее», да? К тому моменту, когда код наконец-то устаканится, его становится так дохера, что задача по написанию комментов превращается в гигантскую кучу навоза, к которой страшно подступиться. У тебя никогда не найдется «пары свободных дней», чтобы просто сидеть и комментить. Всегда найдется оправдание, что важнее пофиксить баги или запилить новую фичу. Итог: горы недокументированного говнокода растут.
 
-## 15.2 Write the comments first
+Даже если у тебя хватит самодисциплины вернуться и написать комменты (не льсти себе, скорее всего, не хватит), они будут отстойными. К этому моменту ты уже ментально «выписался» из этой задачи. В твоей голове этот кусок кода уже помечен как «Готово», и ты мысленно уже пилишь следующий таск. Ты знаешь, что писать комменты надо, но тебе пиздец как не хочется. Ты хочешь отделаться от этого как можно быстрее. В итоге ты пробегаешь по коду, накидывая пару строк чисто для вида, чтобы тимлид отъебался.
+К тому же, с момента проектирования прошло время, и твои воспоминания о том, *почему* ты сделал именно так, уже затуманились. Ты смотришь на код и просто описываешь то, что видишь. Комменты начинают тупо дублировать код. Даже если попытаешься вспомнить неочевидные детали дизайна, что-то ты по-любому забудешь. В итоге в комментах не будет самого главного — сути.
 
-I use a different approach to writing comments, where I write the comments at the very beginning:
+## **15.2 Сначала буквы, потом код**
 
-- For a new class, I start by writing the class interface comment.
-- Next, I write interface comments and signatures for the most important public methods, but I leave the method bodies empty.
-- I iterate a bit over these comments until the basic structure feels about right.
-- At this point I write declarations and comments for the most important class instance variables in the class.
-- Finally, I fill in the bodies of the methods, adding implementation comments as needed.
-- While writing method bodies, I usually discover the need for additional methods and instance variables. For each new method I write the interface comment before the body of the method; for instance variables I fill in the comment at the same time that I write the variable declaration.
+Я использую другой подход: я пишу комменты в самом, сука, начале.
+
+*   Для нового класса я сначала пишу **коммент к интерфейсу класса**.
+*   Затем я пишу комменты и сигнатуры для самых важных публичных методов, но **тела методов оставляю пустыми**.
+*   Я немного медитирую над этими комментами, пока структура не покажется мне правильной.
+*   Дальше я пишу объявления и комменты для ключевых переменных инстанса.
+*   И только потом я заполняю тела методов, добавляя комменты к реализации, если надо.
+*   Пока пишу код, часто понимаю, что нужны еще методы или переменные. Для каждого нового метода я **сначала** пишу интерфейсный коммент, и только потом — код.
 
 ---
 
-When the code is done, the comments are also done. There is never a backlog of unwritten comments.
+Когда код дописан, комменты тоже дописаны. Никакого бэклога из неписаной документации. Красота.
 
-The comments-first approach has three benefits. First, it produces better comments. If you write the comments as you are designing the class, the key design issues will be fresh in your mind, so it’s easy to record them. It’s better to write the interface comment for each method before its body, so you can focus on the method’s abstraction and interface without being distracted by its implementation. During the coding and testing process you will notice and fix problems with the comments. As a result, the comments improve over the course of development.
+У подхода «комменты-сначала» есть три плюса.
+Во-первых, комменты получаются лучше. Пока ты проектируешь класс, ключевые идеи свежи в твоей голове, и их легко записать. Лучше описать интерфейс метода до того, как ты начнешь говнокодить его тело, чтобы сосредоточиться на абстракции, а не отвлекаться на детали реализации. В процессе кодинга и тестов ты будешь замечать косяки в комментах и править их. В итоге, к релизу комменты станут только лучше.
 
-## 15.3 Comments are a design tool
+## **15.3 Комменты — это инструмент дизайна, блять**
 
-The second, and most important, benefit of writing the comments at the beginning is that it improves the system design. Comments provide the only way to fully capture abstractions, and good abstractions are fundamental to good system design. If you write comments describing the abstractions at the beginning, you can review and tune them before writing implementation code. To write a good comment, you must identify the essence of a variable or piece of code: what are the most important aspects of this thing? It’s important to do this early in the design process; otherwise you are just hacking code.
+Второй, и самый жирный плюс: это улучшает дизайн системы. Комменты — это единственный способ зафиксировать абстракции, а хорошие абстракции — это фундамент не-говенной системы. Если ты описываешь абстракции в начале, ты можешь перечитать их и потюнить *до того*, как наломаешь дров в коде. Чтобы написать хороший коммент, нужно понять суть переменной или куска кода: что в этой херне самое важное? Делать это надо на старте, иначе ты просто хаотично херачишь код (хакинг).
 
-Comments serve as a canary in the coal mine of complexity. If a method or variable requires a long comment, it is a red flag that you don’t have a good abstraction. Remember from Chapter 4 that classes should be deep: the best classes have very simple interfaces yet implement powerful functions. The best way to judge the complexity of an interface is from the comments that describe it. If the interface comment for a method provides all the information needed to use the method and is also short and simple, that indicates that the method has a simple interface. Conversely, if there’s no way to describe a method completely without a long and complicated comment, then the method has a complex interface. You can compare a method’s interface comment with the implementation to get a sense of how deep the method is: if the interface comment must describe all the major features of the implementation, then the method is shallow. The same idea applies to variables: if it takes a long comment to fully describe a variable, it’s a red flag that suggests you may not have chosen the right variable decomposition. Overall, the act of writing comments allows you to evaluate your design decisions early, so you can discover and fix problems.
+Комментарии работают как канарейка в шахте сложности. Если метод или переменная требуют комментария размером с «Войну и мир», это **красный флаг**: у тебя хуёвая абстракция. Вспоминаем Главу 4: классы должны быть глубокими (простой интерфейс, мощный функционал). Лучший способ оценить сложность интерфейса — посмотреть на его коммент.
+Если коммент короткий, простой и полностью объясняет, как юзать метод — значит, интерфейс простой. Заебись.
+Если же ты не можешь описать метод без длинного, запутанного эссе — значит, интерфейс переусложнен.
+Сравни коммент интерфейса с реализацией: если коммент вынужден описывать все кишки реализации, значит, метод мелкий (shallow) и бесполезный. То же самое с переменными: если нужно полстраницы текста, чтобы объяснить, нахера эта переменная нужна — ты, скорее всего, облажался с декомпозицией.
 
-img Red Flag: Hard to Describe img
+Короче, написание комментов позволяет тебе оценить свои дизайнерские решения на раннем этапе и пофиксить их, пока не поздно.
 
-The comment that describes a method or variable should be simple and yet complete. If you find it difficult to write such a comment, that’s an indicator that there may be a problem with the design of the thing you are describing.
+> **КРАСНЫЙ ФЛАГ: Хрен опишешь**
+>
+> Комментарий, описывающий метод или переменную, должен быть простым и полным. Если тебе сложно родить такой коммент, это верный признак того, что дизайн этой штуки — говно.
 
-Of course, comments are only a good indicator of complexity if they are complete and clear. If you write a method interface comment that doesn’t provide all the information needed to invoke the method, or one that is so cryptic that it’s hard to understand, then that comment doesn’t provide a good measure of the method’s depth.
+Конечно, это работает, только если комменты честные. Если ты пишешь какую-то криптическую херню или упускаешь важные детали, то такой коммент ни хрена тебе не покажет.
 
-## 15.4 Early comments are fun comments
+## **15.4 Ранние комменты — это весело (я серьезно)**
 
-The third and final benefit of writing comments early is that it makes comment-writing more fun. For me, one of the most enjoyable parts of programming is the early design phase for a new class, where I’m fleshing out the abstractions and structure for the class. Most of my comments are written during this phase, and the comments are how I record and test the quality of my design decisions. I’m looking for the design that can be expressed completely and clearly in the fewest words. The simpler the comments, the better I feel about my design, so finding simple comments is a source of pride. If you are programming strategically, where your main goal is a great design rather than just writing code that works, then writing comments should be fun, since that’s how you identify the best designs.
+Третий плюс: писать комменты в начале тупо приятнее. Для меня самая кайфовая часть программирования — это ранняя стадия дизайна, когда я придумываю абстракции и структуру. Большую часть комментов я пишу именно тогда. Я ищу такой дизайн, который можно описать четко и в двух словах. Чем проще коммент — тем больше я горжусь своим дизайном.
+Если ты программируешь стратегически (то есть твоя цель — крутой дизайн, а не просто «хуяк-хуяк и в продакшн»), то написание комментов должно приносить удовольствие, потому что именно так ты понимаешь, что сделал всё по красоте.
 
-## 15.5 Are early comments expensive?
+## **15.5 А не дохера ли времени это займет?**
 
-Now let’s revisit the argument for delaying comments, which is that it avoids the cost of reworking the comments as the code evolves. A simple back-of-the-envelope calculation will show that this doesn’t save much. First, estimate the total fraction of development time that you spend typing in code and comments together, including time to revise code and comments; it’s unlikely that this will be more than about 10% of all development time. Even if half of your total code lines are comments, writing comments probably doesn’t account for more than about 5% of your total development time. Delaying the comments until the end will save only a fraction of this, which isn’t very much.
+Вернемся к аргументу ленивых задниц про то, что «писать сразу дорого, придется переписывать». Простая математика на салфетке показывает, что это экономия на спичках.
+Прикинь, сколько времени ты реально тратишь на *набор текста* (кода и комментов)? Вряд ли больше 10% от всего времени разработки. Даже если половина твоих строк — это комменты (что вряд ли), то их написание занимает от силы 5% времени. Откладывая их на потом, ты сэкономишь крохи от этих 5%. Это ни о чем.
 
-Writing the comments first will mean that the abstractions will be more stable before you start writing code. This will probably save time during coding. In contrast, if you write the code first, the abstractions will probably evolve as you code, which will require more code revisions than the comments-first approach. When you consider all of these factors, it’s possible that it might be faster overall to write the comments first.
+Зато если писать комменты сначала, твои абстракции станут стабильнее *до* того, как ты начнешь писать код. Это сэкономит тебе время на самом кодинге. А если начнешь сразу с кода, абстракции будут меняться на лету, и тебе придется переписывать *сам код* чаще, чем пришлось бы править комменты.
+Если сложить все факторы, вполне вероятно, что писать комменты сразу — тупо быстрее.
 
-## 15.6 Conclusion
+## **15.6 Итог**
 
-If you haven’t ever tried writing the comments first, give it a try. Stick with it long enough to get used to it. Then think about how it affects the quality of your comments, the quality of your design, and your overall enjoyment of software development. After you have tried this for a while, let me know whether your experience matches mine, and why or why not.
+Если ты никогда не пробовал писать комменты сначала — попробуй, не будь занудой. Заставь себя делать так какое-то время, чтобы привыкнуть. А потом посмотри, как это повлияло на качество твоей писанины, на качество твоего кода и на то, насколько меньше тебе хочется выйти в окно в процессе разработки. Попробуй, а потом расскажешь, прав я был или нет.

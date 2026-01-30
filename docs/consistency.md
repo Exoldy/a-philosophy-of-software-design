@@ -1,47 +1,57 @@
-# Chapter 17 Consistency
+# **ГЛАВА 17. ЕДИНООБРАЗИЕ (CONSISTENCY)**
 
-Consistency is a powerful tool for reducing the complexity of a system and making its behavior more obvious. If a system is consistent, it means that similar things are done in similar ways, and dissimilar things are done in different ways. Consistency creates cognitive leverage: once you have learned how something is done in one place, you can use that knowledge to immediately understand other places that use the same approach. If a system is not implemented in a consistent fashion, developers must learn about each situation separately. This will take more time.
+### **(Или почему твой код не должен выглядеть как лоскутное одеяло, сшитое эпилептиком)**
 
-Consistency reduces mistakes. If a system is not consistent, two situations may appear the same when in fact they are different. A developer may see a pattern that looks familiar and make incorrect assumptions based on previous encounters with that pattern. On the other hand, if the system is consistent, assumptions made based on familiar-looking situations will be safe. Consistency allows developers to work more quickly with fewer mistakes.
+Единообразие (оно же консистентность) — это мощнейший инструмент, чтобы снизить градус безумия в системе и сделать её поведение хоть немного предсказуемым. Если система согласована, это значит, что похожие вещи делаются похожими способами, а разные — разными. Логично, да?
 
-## 17.1 Examples of consistency
+Это создает **когнитивный рычаг**: один раз вкурив, как работает какая-то херня в одном месте, ты автоматически понимаешь, как она работает везде. Если же система написана в стиле «кто в лес, кто по дрова», разработчикам приходится изучать каждый кусок кода с нуля. А это, сука, время.
 
-Consistency can be applied at many levels in a system; here are a few examples.
+Единообразие снижает количество косяков. Если система неконсистентна, две ситуации могут выглядеть одинаково, но вести себя по-разному. Ты видишь знакомый паттерн, расслабляешь булки, делаешь предположение — и всё падает, потому что здесь это работает *иначе*. В нормальной системе твои привычки работают на тебя. Единообразие позволяет кодить быстрее и не обсираться на ровном месте.
 
-Names. Chapter 14 has already discussed the benefits of using names in a consistent way.
+## **17.1 Примеры единообразия (Где не надо выпендриваться)**
 
-Coding style. It is common nowadays for development organizations to have style guides that restrict program structure beyond the rules enforced by compilers. Modern style guides address a range of issues, such as indentation, curly-brace placement, order of declarations, naming, commenting, and restrictions on language features considered dangerous. Style guidelines make code easier to read and can reduce some kinds of errors.
+Единообразие можно наводить на разных уровнях, вот тебе примеры:
 
-Interfaces. An interface with multiple implementations is another example of consistency. Once you understand one implementation of the interface, any other implementation becomes easier to understand because you already know the features it will have to provide.
+**Имена.** В 14-й главе мы уже перетерли за то, почему называть переменные от балды — плохая идея. Не будем повторяться.
 
-Design patterns. Design patterns are generally-accepted solutions to certain common problems, such as the model-view-controller approach to user interface design. If you can use an existing design pattern to solve the problem, the implementation will proceed more quickly, it is more likely to work, and your code will be more obvious to readers. Design patterns are discussed in more detail in Section 19.5.
+**Стиль кода.** Сейчас в любой приличной конторе есть стайл-гайды. Они ограничивают твою «творческую натуру» даже жестче, чем компилятор. Отступы, где ставить ебучие фигурные скобки, порядок объявлений, нейминг — всё расписано. Это нужно не для того, чтобы тебя унизить, а чтобы код было легко читать и чтобы ты не выстрелил себе в ногу «опасными фичами» языка.
 
-Invariants. An invariant is a property of a variable or structure that is always true. For example, a data structure storing lines of text might enforce an invariant that each line is terminated by a newline character. Invariants reduce the number of special cases that must be considered in code and make it easier to reason about the code’s behavior.
+**Интерфейсы.** Интерфейс с кучей реализаций — это классика единообразия. Понял одну реализацию — поймешь и остальные, потому что ты уже знаешь, чего от них ждать.
 
-## 17.2 Ensuring consistency
+**Паттерны проектирования.** Это общепринятые костыли для типовых проблем (типа MVC для интерфейсов). Если ты берешь готовый паттерн, реализация пойдет быстрее, оно с большей вероятностью заработает, и любой, кто будет читать твой код, сразу поймет: «Ага, это MVC», а не будет гадать, что ты там нагородил. Подробнее об этом в главе 19.5, не переключайтесь.
 
-Consistency is hard to maintain, especially when many people work on a project over a long time. People in one group may not know about conventions established in another group. Newcomers don’t know the rules, so they unintentionally violate the conventions and create new conventions that conflict with existing ones. Here are a few tips for establishing and maintaining consistency:
+**Инварианты.** Это такая штука, которая всегда истинна. Например, структура данных для текста может гарантировать инвариант: «каждая строка заканчивается символом переноса». Инварианты избавляют тебя от написания кучи `if`-ов для обработки крайних случаев и упрощают понимание того, как этот код вообще живет.
 
-Document. Create a document that lists the most important overall conventions, such as coding style guidelines. Place the document in a spot where developers are likely to see it, such as a conspicuous place on the project Wiki. Encourage new people joining the group to read the document, and encourage existing people to review it every once in a while. Several style guides from various organizations have been published on the Web; consider starting with one of these.
+## **17.2 Как обеспечить единообразие (Миссия невыполнима?)**
 
-For conventions that are more localized, such as invariants, find an appropriate spot in the code to document them. If you don’t write the conventions down, it’s unlikely that other people will follow them.
+Держать марку сложно, особенно когда над проектом годами трудится толпа народу. Одна команда не знает, что придумала другая. Приходят новички (васяны), которые не знают правил, нарушают их и создают свои, конфликтующие с тем, что было. Вот пара советов, как не скатиться в хаос:
 
-Enforce. Even with good documentation, it’s hard for developers to remember all of the conventions. The best way to enforce conventions is to write a tool that checks for violations, and make sure that code cannot be committed to the repository unless it passes the checker. Automated checkers work particularly well for low-level syntactic conventions.
+**Документируй.** Создай доку, где прописаны главные понятия, например, гайд по стилю. Положи это туда, где разрабы реально это увидят (например, на самое видное место в Wiki, а не в папку `docs/old/unused/2005`). Заставляй новичков это читать, а стариков — перечитывать, чтобы не расслаблялись. В интернете полно готовых гайдов от гуглов и фейсбуков — начни с них, если лень писать своё.
 
-One of my recent projects had problems with line termination characters. Some developers worked on Unix, where lines are terminated by newlines; others worked on Windows, where lines are normally terminated by a carriage-return followed by a newline. If a developer on one system made a small edit to a file previously edited on the other system, the editor would sometimes replace all of the line terminators with ones appropriate for that system. This gave the appearance that every line of the file had been modified, which made it hard to track the meaningful changes. We established a convention that files should contain newlines only, but it was hard to ensure that every tool used by every developer followed the convention. Every time a new developer joined the project, we would experience a rash of line termination problems while that developer adjusted to the convention.
+Для локальных правил (типа инвариантов) пиши комменты прямо в коде. Если ты не запишешь правило, никто, блядь, не будет его соблюдать.
 
-We eventually solved this problem by writing a short script that was executed automatically before changes are committed to the source code repository. The script checks all of the files that have been modified and aborts the commit if any of them contain carriage returns. The script can also be run manually to repair damaged files by replacing carriage-return/newline sequences with newlines. This instantly eliminated the problems, and it also helped train new developers.
+**Принуждай.** Даже с отличной документацией разрабы будут забывать правила. Лучший способ заставить их соблюдать конвенции — написать тулзу, которая бьет их по рукам. Автоматические чекеры (линтеры) не должны давать закоммитить код, если он нарушает правила. Для синтаксиса это работает идеально.
 
-Code reviews provide another opportunity for enforcing conventions and for educating new developers about the conventions. The more nit-picky that code reviewers are, the more quickly everyone on the team will learn the conventions, and the cleaner the code will be.
+*История из жизни:* На одном проекте у нас была война форматов концов строк. Одни сидели на Unix (`\n`), другие на Windows (`\r\n`). Стоило виндузятнику поправить один символ, его редактор переписывал ВСЕ переносы строк в файле. Гит сходил с ума, дифф показывал, что изменился весь файл. Мы договорились юзать только `\n`, но хрен ты проследишь за каждым редактором каждого джуна. Каждый новый сотрудник начинал с того, что ломал нам репозиторий.
 
-When in Rome ... The most important convention of all is that every developer should follow the old adage “When in Rome, do as the Romans do.” When working in a new file, look around to see how the existing code is structured. Are all public variables and methods declared before private ones? Are the methods in alphabetical order? Do variables use “camel case,” as in firstServerName, or “snake case,” as in first_server_name? When you see anything that looks like it might possibly be a convention, follow it. When making a design decision, ask yourself if it’s likely that a similar decision was made elsewhere in the project; if so, find an existing example and use the same approach in your new code.
+В итоге мы написали скрипт, который запускался перед коммитом. Нашел `\r`? Иди нахер, коммит отменяется. Скрипт мог и сам починить файл. Проблема исчезла мгновенно, а новички быстро дрессировались.
 
-Don’t change existing conventions. Resist the urge to “improve” on existing conventions. Having a “better idea” is not a sufficient excuse to introduce inconsistencies. Your new idea may indeed be better, but the value of consistency over inconsistency is almost always greater than the value of one approach over another. Before introducing inconsistent behavior, ask yourself two questions. First, do you have significant new information justifying your approach that wasn’t available when the old convention was established? Second, is the new approach so much better that it is worth taking the time to update all of the old uses? If your organization agrees that the answers to both questions are “yes,” then go ahead and make the upgrade; when you are done, there should be no sign of the old convention. However, you still run the risk that other developers will not know about the new convention, so they may reintroduce the old approach in the future. Overall, reconsidering established conventions is rarely a good use of developer time.
+**Код-ревью.** Еще один шанс ткнуть носом в нарушения и обучить молодежь. Чем больше душнил будет на код-ревью, тем быстрее команда выучит правила и тем чище будет код.
 
-## 17.3 Taking it too far
+**В чужой монастырь...** Самое главное правило: «Делай как местные». Зашел в новый файл? Оглядись, сука. Как тут пишут? Сначала публичные методы, потом приватные? Методы по алфавиту? Переменные в `camelCase` или `snake_case`? Видишь конвенцию — следуй ей. Не надо тащить свои привычки. Если принимаешь проектное решение, посмотри, как решали похожие задачи до тебя. Найди пример и сделай Ctrl+C, Ctrl+V (ну, идейно).
 
-Consistency means not only that similar things should be done in similar ways, but that dissimilar things should be done in different ways. If you become overzealous about consistency and try to force dissimilar things into the same approach, such as by using the same variable name for things that are really different or using an existing design pattern for a task that doesn’t fit the pattern, you’ll create complexity and confusion. Consistency only provides benefits when developers have confidence that “if it looks like an x, it really is an x.”
+**Не меняй существующие правила.** Сопротивляйся желанию «улучшить» конвенции. Твоя «гениальная идея» — недостаточное оправдание для создания бардака. Единообразие почти всегда важнее, чем то, что один подход чуть лучше другого. Прежде чем внести разлад, спроси себя:
+1. Есть ли у меня реально веские причины, которых не было у тех, кто придумал старое правило?
+2. Настолько ли новый подход круче, что стоит потратить время на переписывание ВСЕГО старого кода?
 
-## 17.4 Conclusion
+Если на оба вопроса ответ «да» (и команда согласна) — вперед, рефактори всё до основания. Чтобы от старого стиля и духу не осталось. Но чаще всего пересмотр правил — это просто просирание времени разработчиков.
 
-Consistency is another example of the investment mindset. It will take a bit of extra work to ensure consistency: work to decide on conventions, work to create automated checkers, work to look for similar situations to mimic in new code, and work in code reviews to educate the team. The return on this investment is that your code will be more obvious. Developers will be able to understand the code’s behavior more quickly and accurately, and this will allow them to work faster, with fewer bugs.
+## **17.3 Когда заносит на поворотах**
+
+Единообразие — это не только «делать похожее похожим», но и «делать разное разным». Если ты упорешься по консистентности и начнешь натягивать сову на глобус, пытаясь подогнать разные вещи под один шаблон (например, использовать одно имя переменной для принципиально разных сущностей или пихать паттерн туда, где он нахер не нужен), ты создашь сложность и путаницу.
+
+Единообразие полезно только тогда, когда разраб может быть уверен: «Если это выглядит как утка, то это, сука, утка, а не замаскированная противотанковая мина».
+
+## **17.4 Итог**
+
+Единообразие — это еще один пример инвестиционного мышления. Придется потрахаться сейчас: договориться о правилах, настроить линтеры, искать примеры для подражания и душнить на ревью. Но дивиденды с этой инвестиции — код, который очевиден. Разрабы будут понимать его быстрее, меньше тупить и реже ронять прод.

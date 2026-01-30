@@ -1,78 +1,91 @@
-# 第五章 信息隐藏（和泄漏）
+# **ГЛАВА 5. ПРЯЧЕМ ИНФУ (И ПРОЁБЫВАЕМ ЕЁ)**
 
-Chapter 4 argued that modules should be deep. This chapter, and the next few that follow, discuss techniques for creating deep modules.
+В прошлой главе мы выяснили, что модули должны быть глубокими. В этой (и следующих) главах мы разберем техники, как сделать так, чтобы твой код был действительно глубоким, а не просто запутанным куском... ну ты понял.
 
-## 5.1 Information hiding
+## **5.1 Сокрытие информации (Шифруемся грамотно)**
 
-The most important technique for achieving deep modules is *information hiding*. This technique was first described by David Parnas1. The basic idea is that each module should encapsulate a few pieces of knowledge, which represent design decisions. The knowledge is embedded in the module’s implementation but does not appear in its interface, so it is not visible to other modules.
+Самая главная техника для создания глубоких модулей — это **сокрытие информации**. Эту фишку придумал Дэвид Парнас ещё в лохматые 70-е. Базовая идея проста: каждый модуль должен инкапсулировать (читай: прятать внутри себя) кусок знаний о том, как всё устроено. Эти знания живут внутри реализации, но в интерфейсе их не видно. Другим модулям вообще не всралось знать, что у тебя там под капотом.
 
-The information hidden within a module usually consists of details about how to implement some mechanism. Here are some examples of information that might be hidden within a module:
+Обычно прячут детали реализации механизмов. Примеры того, что нормальные люди прячут внутри модуля:
 
-- How to store information in a B-tree, and how to access it efficiently.
-- How to identify the physical disk block corresponding to each logical block within a file.
-- How to implement the TCP network protocol.
-- How to schedule threads on a multi-core processor.
-- How to parse JSON documents.
+*   Как хранить данные в B-дереве и искать их там, не умирая от старости.
+*   Как мапить логические блоки файла на физические сектора диска (тебе оно надо?).
+*   Как на самом деле работает протокол TCP (поверь, ты не хочешь этого знать).
+*   Как шедулить потоки на многоядерном проце.
+*   Как парсить этот сраный JSON.
 
 ---
 
-The hidden information includes data structures and algorithms related to the mechanism. It can also include lower-level details such as the size of a page, and it can include higher-level concepts that are more abstract, such as an assumption that most files are small.
+Скрытая инфа — это структуры данных и алгоритмы. Это могут быть низкоуровневые детали (типа размера страницы памяти) или высокоуровневые абстракции (типа предположения, что "большинство файлов маленькие, так что похер").
 
-Information hiding reduces complexity in two ways. First, it simplifies the interface to a module. The interface reflects a simpler, more abstract view of the module’s functionality and hides the details; this reduces the cognitive load on developers who use the module. For instance, a developer using a B-tree class need not worry about the ideal fanout for nodes in the tree or how to keep the tree balanced. Second, information hiding makes it easier to evolve the system. If a piece of information is hidden, there are no dependencies on that information outside the module containing the information, so a design change related to that information will affect only the one module. For example, if the TCP protocol changes (to introduce a new mechanism for congestion control, for instance), the protocol’s implementation will have to be modified, but no changes should be needed in higher-level code that uses TCP to send and receive data.
+Сокрытие информации снижает сложность двумя путями:
 
-When designing a new module, you should think carefully about what information can be hidden in that module. If you can hide more information, you should also be able to simplify the module’s interface, and this makes the module deeper.
+1.  **Упрощает интерфейс.** Интерфейс становится чище и абстрактнее. Это снижает когнитивную нагрузку на разраба. Если ты юзаешь класс B-дерева, тебе насрать на балансировку узлов. Ты просто говоришь: "Найди мне X", и оно находит.
+2.  **Упрощает эволюцию системы.** Если ты спрятал кишки модуля внутри, то снаружи от них никто не зависит. Захотел поменять реализацию TCP? Меняй. Верхнеуровневый код, который просто шлет байтики, даже не чихнет.
 
-Note: hiding variables and methods in a class by declaring them private isn’t the same thing as information hiding. Private elements can help with information hiding, since they make it impossible for the items to be accessed directly from outside the class. However, information about the private items can still be exposed through public methods such as getter and setter methods. When this happens the nature and usage of the variables are just as exposed as if the variables were public.
+**Совет:** Когда дизайнишь новый модуль, крепко подумай, какую инфу можно заныкать. Чем больше ты спрячешь, тем проще будет интерфейс, и тем глубже будет модуль.
 
-The best form of information hiding is when information is totally hidden within a module, so that it is irrelevant and invisible to users of the module. However, partial information hiding also has value. For example, if a particular feature or piece of information is only needed by a few of a class’s users, and it is accessed through separate methods so that it isn’t visible in the most common use cases, then that information is mostly hidden. Such information will create fewer dependencies than information that is visible to every user of the class.
+**Важное примечание:** Объявить переменные и методы `private` — это еще не сокрытие информации. Если ты сделал переменную приватной, но налепил к ней публичные геттеры и сеттеры, то ты, по сути, просто выставил её напоказ. Ты ничего не спрятал, ты просто добавил бюрократии.
 
-## 5.2 Information leakage
+Лучшая форма сокрытия — когда инфа вообще не видна снаружи. Но частичное сокрытие тоже катит. Если какая-то фича нужна только паре фриков, спрячь её за отдельными методами, чтобы нормальные люди не спотыкались об неё в основных сценариях.
 
-The opposite of information hiding is *information leakage*. Information leakage occurs when a design decision is reflected in multiple modules. This creates a dependency between the modules: any change to that design decision will require changes to all of the involved modules. If a piece of information is reflected in the interface for a module, then by definition it has been leaked; thus, simpler interfaces tend to correlate with better information hiding. However, information can be leaked even if it doesn’t appear in a module’s interface. Suppose two classes both have knowledge of a particular file format (perhaps one class reads files in that format and the other class writes them). Even if neither class exposes that information in its interface, they both depend on the file format: if the format changes, both classes will need to be modified. Back-door leakage like this is more pernicious than leakage through an interface, because it isn’t obvious.
+## **5.2 Утечка информации (Когда всё протекло)**
 
-Information leakage is one of the most important red flags in software design. One of the best skills you can learn as a software designer is a high level of sensitivity to information leakage. If you encounter information leakage between classes, ask yourself “How can I reorganize these classes so that this particular piece of knowledge only affects a single class?” If the affected classes are relatively small and closely tied to the leaked information, it may make sense to merge them into a single class. Another possible approach is to pull the information out of all of the affected classes and create a new class that encapsulates just that information. However, this approach will be effective only if you can find a simple interface that abstracts away from the details; if the new class exposes most of the knowledge through its interface, then it won’t provide much value (you’ve simply replaced back-door leakage with leakage through an interface).
+Противоположность сокрытия — **утечка информации**. Это когда твое "гениальное" архитектурное решение размазано по нескольким модулям. Это создает зависимость: поменял что-то в одном месте — иди правь в пяти других.
 
-img Red Flag: Information Leakage img
+Если деталь реализации торчит в интерфейсе — это официальная утечка. Но бывает и хуже: **скрытая утечка**. Представь два класса, которые оба знают про формат какого-то файла. Даже если они не светят это в интерфейсе, они оба зависят от этого формата. Поменял формат — переписывай оба класса. Такая утечка через задний проход (back-door leakage) — самая подлая херня, потому что её не видно сразу.
 
-Information leakage occurs when the same knowledge is used in multiple places, such as two different classes that both understand the format of a particular type of file.
+Утечка информации — это жирнющий красный флаг. Хороший дизайнер чует утечку за версту. Видишь утечку? Спроси себя: "Как мне перетасовать классы так, чтобы это знание жило только в одном месте?". Иногда проще слить два мелких класса в один большой, чем трахаться с зависимостями. Или вынести эту инфу в третий, новый класс. Но только если у него будет простой интерфейс, иначе ты просто переложил говно из одной кучи в другую.
 
-## 5.3 Temporal decomposition
+> **АХТУНГ: Утечка информации**
+> Утечка происходит, когда одно и то же знание используется в разных местах. Например, два разных класса знают структуру одного файла. Поменяешь файл — сломаешь оба класса.
 
-One common cause of information leakage is a design style I call *temporal decomposition*. In temporal decomposition, the structure of a system corresponds to the time order in which operations will occur. Consider an application that reads a file in a particular format, modifies the contents of the file, and then writes the file out again. With temporal decomposition, this application might be broken into three classes: one to read the file, another to perform the modifications, and a third to write out the new version. Both the file reading and file writing steps have knowledge about the file format, which results in information leakage. The solution is to combine the core mechanisms for reading and writing files into a single class. This class will get used during both the reading and writing phases of the application. It’s easy to fall into the trap of temporal decomposition, because the order in which operations must occur is often on your mind when you code. However, most design decisions manifest themselves at several different times over the life of the application; as a result, temporal decomposition often results in information leakage.
+## **5.3 Временная декомпозиция (Любимая ошибка новичков)**
 
-Order usually does matter, so it will be reflected somewhere in the application. However, it shouldn’t be reflected in the module structure unless that structure is consistent with information hiding (perhaps the different stages use totally different information). **When designing modules, focus on the knowledge that’s needed to perform each task, not the order in which tasks occur**.
+Частая причина утечек — стиль дизайна, который я называю **временнóй декомпозицией**. Это когда ты структурируешь систему по порядку действий во времени.
 
-img Red Flag: Temporal Decomposition img
+Типа: "Сначала мы читаем файл, потом меняем данные, потом пишем файл".
+И ты, недолго думая, пилишь три класса: `FileReader`, `DataModifier`, `FileWriter`.
+В итоге и читатель, и писатель знают про формат файла. Поздравляю, у тебя утечка.
 
-In temporal decomposition, execution order is reflected in the code structure: operations that happen at different times are in different methods or classes. If the same knowledge is used at different points in execution, it gets encoded in multiple places, resulting in information leakage.
+Решение: запихни чтение и запись в один класс, который шарит за формат файла.
+В ловушку временной декомпозиции легко попасть, потому что ты, когда кодишь, думаешь алгоритмом: "сначала это, потом то". Но архитектура должна строиться вокруг **знаний**, а не вокруг **порядка действий**.
 
-## 5.4 Example: HTTP server
+> **АХТУНГ: Временная декомпозиция**
+> Это когда структура кода повторяет порядок выполнения. Операции, которые происходят в разное время, разлетаются по разным классам. Если одно знание нужно на разных этапах, оно дублируется, и мы получаем утечку.
 
-To illustrate the issues in information hiding, let’s consider the design decisions made by students implementing the HTTP protocol in a software design course. It’s useful to see both the things they did well and they areas where they had problems.
+## **5.4 Пример: HTTP сервер**
 
-HTTP is a mechanism used by Web browsers to communicate with Web servers. When a user clicks on a link in a Web browser or submits a form, the browser uses HTTP to send a request over the network to a Web server. Once the server has processed the request, it sends a response back to the browser; the response normally contains a new Web page to display. The HTTP protocol specifies the format of requests and responses, both of which are represented textually. Figure 5.1 shows a sample HTTP request describing a form submission. The students in the course were asked to implement one or more classes to make it easy for Web servers to receive incoming HTTP requests and send responses.
+Давайте посмотрим на студентов, которые писали HTTP-сервер. На их ошибках учиться веселее.
 
-![](./figures/00014.gif)
+HTTP — это протокол, по которому браузер базарит с сервером. Запрос — это текст. Студентам надо было написать классы для приема запросов и отправки ответов.
 
-Figure 5.1: A POST request in the HTTP protocol consists of text sent over a TCP socket. Each request contains an initial line, a collection of headers terminated by an empty line, and an optional body. The initial line contains the request type (POST is used for submitting form data), a URL indicating an operation (/comments/create) and optional parameters (photo_id has the value 246), and the HTTP protocol version used by the sender. Each header line consists of a name such as Content-Length followed by its value. For this request, the body contains additional parameters (comment and priority).
+*(Тут была картинка с HTTP запросом, но ты и так знаешь, как выглядит POST-запрос, не маленький).*
 
-## 5.5 Example: too many classes
+## **5.5 Пример: слишком много классов**
 
-The most common mistake made by students was to divide their code into a large number of shallow classes, which led to information leakage between the classes. One team used two different classes for receiving HTTP requests; the first class read the request from the network connection into a string, and the second class parsed the string. This is an example of a temporal decomposition (“first we read the request, then we parse it”). Information leakage occurred because an HTTP request can’t be read without parsing much of the message; for example, the Content-Length header specifies the length of the request body, so the headers must be parsed in order to compute the total request length. As a result, both classes needed to understand most of the structure of HTTP requests, and parsing code was duplicated in both classes. This approach also created extra complexity for callers, who had to invoke two methods in different classes, in a particular order, to receive a request.
+Главный косяк студентов — они наплодили кучу мелких, плоских классов.
+Одна команда сделала два класса для приема запроса: первый вычитывает байты из сокета в строку, второй парсит эту строку.
+Это классическая **временная декомпозиция**: "сначала читаем, потом парсим".
+Проблема в том, что ты не можешь нормально прочитать запрос, не распарсив его (тебе надо знать `Content-Length`, чтобы понять, сколько читать). В итоге оба класса должны знать структуру HTTP. Код дублируется, сложность растет, вызывающий код должен дергать два метода в строгом порядке. Бред.
 
-Because the classes shared so much information, it would have been better to merge them into a single class that handles both request reading and parsing. This provides better information hiding, since it isolates all knowledge of the request format in one class, and it also provides a simpler interface to callers (just one method to invoke).
+Было бы лучше слить их в один класс. Это улучшает сокрытие информации (все знания о формате HTTP в одном месте) и упрощает жизнь (вызвал один метод и забыл).
 
-This example illustrates a general theme in software design: **information hiding can often be improved by making a class slightly larger**. One reason for doing this is to bring together all of the code related to a particular capability (such as parsing an HTTP request), so that the resulting class contains everything related to that capability. A second reason for increasing the size of a class is to raise the level of the interface; for example, rather than having separate methods for each of three steps of a computation, have a single method that performs the entire computation. This can result in a simpler interface. Both of these benefits apply in the example of the previous paragraph: combining the classes brings together all of the code related to parsing an HTTP request, and it replaces two externally-visible methods with one. The combined class is deeper than the original classes.
+Этот пример иллюстрирует важную мысль: **иногда жирный класс — это хорошо**.
+Объединение кода в одном месте позволяет спрятать кишки и дать наружу простой интерфейс.
 
-Of course, it is possible to take the notion of larger classes too far (such as a single class for the entire application). Chapter 9 will discuss conditions under which it makes sense to separate code into multiple smaller classes.
+Конечно, не надо делать `GodObject`, который делает вообще всё. Но об этом в 9-й главе.
 
-## 5.6 Example: HTTP parameter handling
+## **5.6 Пример: обработка параметров HTTP**
 
-After an HTTP request has been received by a server, the server needs to access some of the information from the request. The code that handles the request in Figure 5.1 might need to know the value of the photo_id parameter. Parameters can be specified in the first line of the request (photo_id in Figure 5.1) or, sometimes, in the body (comment and priority in Figure 5.1). Each parameter has a name and a value. The values of parameters use a special encoding called URL encoding; for example, in the value for comment in Figure 5.1, “+” is used to represent a space character, and “%21” is used instead of “!”. In order to process a request, the server will need the values for some of the parameters, and it will want them in unencoded form.
+Серверу нужно достать параметры из запроса (типа `photo_id` или `comment`). Они могут быть в URL, могут быть в теле, и они еще закодированы (всякие `%20` вместо пробелов).
 
-Most of the student projects made two good choices with respect to parameter handling. First, they recognized that server applications don’t care whether a parameter is specified in the header line or the body of the request, so they hid this distinction from callers and merged the parameters from both locations together. Second, they hid knowledge of URL encoding: the HTTP parser decodes parameter values before returning them to the Web server, so that the value of the comment parameter in Figure 5.1 will be returned as “What a cute baby!”, not “What+a+cute+baby%21”). In both of these cases, information hiding resulted in simpler APIs for the code using the HTTP module.
+Что студенты сделали хорошо:
+1.  Спрятали разницу между параметрами в URL и в теле. Вызывающему пофиг, где был параметр.
+2.  Спрятали URL-декодирование. Сервер отдает уже нормальный текст "Hello World", а не "Hello%20World".
 
-However, most of the students used an interface for returning parameters that was too shallow, and this resulted in lost opportunities for information hiding. Most projects used an object of type HTTPRequest to hold the parsed HTTP request, and the HTTPRequest class had a single method like the following one to return parameters:
+Где они облажались:
+Почти все сделали метод типа такого:
 
 ```java
 public Map<String, String> getParams() {
@@ -80,42 +93,58 @@ public Map<String, String> getParams() {
 }
 ```
 
-Rather than returning a single parameter, the method returns a reference to the Map used internally to store all of the parameters. This method is shallow, and it exposes the internal representation used by the HTTPRequest class to store parameters. Any change to that representation will result in a change to the interface, which will require modifications to all callers. When implementations are modified, the changes often involve changes in the representation of key data structures (to improve performance, for example). Thus, it’s important to avoid exposing internal data structures as much as possible. This approach also makes more work for callers: a caller must first invoke getParams, then it must call another method to retrieve a specific parameter from the Map. Finally, callers must realize that they should not modify the Map returned by getParams, since that will affect the internal state of the HTTPRequest.
+Это, блядь, фиаско. Метод возвращает ссылку на внутреннюю `Map`.
+1.  Это **плоский интерфейс**. Ты вываливаешь свои кишки (внутреннюю структуру данных) наружу. Захочешь поменять `Map` на что-то другое — переписывай весь проект.
+2.  Это неудобно. Юзеру надо вызвать `getParams()`, получить карту, потом дергать карту.
+3.  Это опасно. Юзер может случайно (или специально) поменять эту карту и сломать состояние объекта `HTTPRequest`.
 
-Here is a better interface for retrieving parameter values:
+Нормальный пацанский интерфейс выглядит так:
 
 ```java
 public String getParameter(String name) { ... }
-
 public int getIntParameter(String name) { ... }
 ```
 
-getParameter returns a parameter value as a string. It provides a slightly deeper interface than getParams above; more importantly, it hides the internal representation of parameters. getIntParameter converts the value of a parameter from its string form in the HTTP request to an integer (e.g., the photo_id parameter in Figure 5.1). This saves the caller from having to request string-to-integer conversion separately, and hides that mechanism from the caller. Additional methods for other data types, such as getDoubleParameter, could be defined if needed. (All of these methods will throw exceptions if the desired parameter doesn’t exist, or if it can’t be converted to the requested type; the exception declarations have been omitted in the code above).
+`getParameter` прячет структуру хранения.
+`getIntParameter` сразу парсит строку в число. Это удобно: не надо самому делать `Integer.parseInt` и ловить эксепшены каждый раз.
+Это пример **глубокого интерфейса**.
 
-## 5.7 Example: defaults in HTTP responses
+## **5.7 Пример: дефолты в HTTP ответах**
 
-The HTTP projects also had to provide support for generating HTTP responses. The most common mistake students made in this area was inadequate defaults. Each HTTP response must specify an HTTP protocol version; one team required callers to specify this version explicitly when creating a response object. However, the response version must correspond to that in the request object, and the request must already be passed as an argument when sending the response (it indicates where to send the response). Thus, it makes more sense for the HTTP classes to provide the response version automatically. The caller is unlikely to know what version to specify, and if the caller does specify a value, it probably results in information leakage between the HTTP library and the caller. HTTP responses also include a Date header specifying the time when the response was sent; the HTTP library should provide a sensible default for this as well.
+Еще одна боль — создание ответов.
+Студенты заставляли юзера указывать версию HTTP при создании ответа.
+Алло! Версия ответа должна совпадать с версией запроса. Библиотека сама знает запрос, пусть сама и подставит версию. Юзер вообще может не знать, какая там версия.
+То же самое с датой (`Date` header). Библиотека должна ставить текущее время по дефолту.
 
-Defaults illustrate the principle that interfaces should be designed to make the common case as simple as possible. They are also an example of partial information hiding: in the normal case, the caller need not be aware of the existence of the defaulted item. In the rare cases where a caller needs to override a default, it will have to know about the value, and it can invoke a special method to modify it.
+**Дефолты** — это круто. Они делают интерфейс простым для 99% случаев. Если кому-то реально надо переопределить дату — дай ему отдельный метод. Но по умолчанию всё должно работать "из коробки".
 
-Whenever possible, classes should “do the right thing” without being explicitly asked. Defaults are an example of this. The Java I/O example on page 26 illustrates this point in a negative way. Buffering in file I/O is so universally desirable that noone should ever have to ask explicitly for it, or even be aware of its existence; the I/O classes should do the right thing and provide it automatically. The best features are the ones you get without even knowing they exist.
+Хороший класс должен делать правильные вещи, не заставляя тебя умолять об этом.
+Плохой пример — Java I/O. Чтобы получить буферизацию (которая нужна всем и всегда), ты должен явно обернуть стрим в `BufferedInputStream`. Какого хера? Оно должно быть включено по дефолту! Лучшие фичи — это те, о существовании которых ты даже не догадываешься, потому что они просто работают.
 
-img Red Flag: Overexposure img
+> **АХТУНГ: Эксгибиционизм в API**
+> Если для простой задачи API заставляет меня изучать настройки, которые нужны раз в сто лет — это плохой дизайн. Это грузит мозг.
 
-If the API for a commonly used feature forces users to learn about other features that are rarely used, this increases the cognitive load on users who don’t need the rarely used features.
+## **5.8 Сокрытие информации внутри класса**
 
-## 5.8 Information hiding within a class
+Сокрытие работает не только для публичных API. Внутри класса тоже надо прятать говно.
+Дизайни приватные методы и переменные так, чтобы минимизировать доступ к ним.
+Если переменная используется во всем классе — это повод напрячься. Если можно ограничить её использование парой методов — сделай это. Чем меньше мест, где трогают данные, тем меньше шансов, что какой-то джун их запорет.
 
-The examples in this chapter focused on information hiding as it relates to the externally visible APIs for classes, but information hiding can also be applied at other levels in the system, such as within a class. Try to design the private methods within a class so that each method encapsulates some information or capability and hides it from the rest of the class. In addition, try to minimize the number of places where each instance variable is used. Some variables may need to be accessed widely across the class, but others may be needed in only a few places; if you can reduce the number of places where a variable is used, you will eliminate dependencies within the class and reduce its complexity.
+## **5.9 Не перегибай палку**
 
-## 5.9 Taking it too far
+Сокрытие имеет смысл, только если инфа не нужна снаружи.
+Если параметр реально нужен юзеру для настройки производительности — **не прячь его**. Выставь его в интерфейс.
+Твоя цель — минимизировать инфу, которая *нужна* снаружи, а не скрывать то, без чего работать невозможно. Если модуль может настроиться сам — круто. Если нет — дай ручку настройки, не будь мудаком.
 
-Information hiding only makes sense when the information being hidden is not needed outside its module. If the information is needed outside the module, then you must not hide it. Suppose that the performance of a module is affected by certain configuration parameters, and that different uses of the module will require different settings of the parameters. In this case it is important that the parameters are exposed in the interface of the module, so that they can be turned appropriately. As a software designer, your goal should be to minimize the amount of information needed outside a module; for example, if a module can automatically adjust its configuration, that is better than exposing configuration parameters. But, it’s important to recognize which information is needed outside a module and make sure it is exposed.
+## **5.10 Итог**
 
-## 5.10 Conclusion
+Сокрытие информации и глубокие модули — это братья навек.
+Чем больше ты прячешь, тем глубже модуль.
+Чем больше ты вываливаешь наружу, тем он более плоский и убогий.
 
-Information hiding and deep modules are closely related. If a module hides a lot of information, that tends to increase the amount of functionality provided by the module while also reducing its interface. This makes the module deeper. Conversely, if a module doesn’t hide much information, then either it doesn’t have much functionality, or it has a complex interface; either way, the module is shallow.
+Когда нарезаешь систему на модули:
+1.  Забей на порядок действий во времени (это путь к временной декомпозиции и страданиям).
+2.  Думай о **знаниях**.
+3.  Инкапсулируй каждое знание в отдельный модуль.
 
-When decomposing a system into modules, try not to be influenced by the order in which operations will occur at runtime; that will lead you down the path of temporal decomposition, which will result in information leakage and shallow modules. Instead, think about the different pieces of knowledge that are needed to carry out the tasks of your application, and design each module to encapsulate one or a few of those pieces of knowledge. This will produce a clean and simple design with deep modules.
-
-1David Parnas, “On the Criteria to be Used in Decomposing Systems into Modules,” Communications of the ACM, December 1972.
+Так победишь.

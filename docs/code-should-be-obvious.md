@@ -1,18 +1,24 @@
-# Chapter 18 Code Should be Obvious
+# **ГЛАВА 18. КОД ДОЛЖЕН БЫТЬ ОЧЕВИДНЫМ**
 
-Obscurity is one of the two main causes of complexity described in Section 2.3. Obscurity occurs when important information about a system is not obvious to new developers. The solution to the obscurity problem is to write code in a way that makes it obvious; this chapter discusses some of the factors that make code more or less obvious.
+### **(Или почему твой «гениальный» код — говно, если его нужно расшифровывать)**
 
-If code is obvious, it means that someone can read the code quickly, without much thought, and their first guesses about the behavior or meaning of the code will be correct. If code is obvious, a reader doesn’t need to spend much time or effort to gather all the information they need to work with the code. If code is not obvious, then a reader must expend a lot of time and energy to understand it. Not only does this reduce their efficiency, but it also increases the likelihood of misunderstanding and bugs. Obvious code needs fewer comments than nonobvious code.
+«Непонятность» (Obscurity) — это один из двух всадников Апокалипсиса сложности, о которых мы говорили в разделе 2.3. Непонятность возникает, когда важная инфа о системе нихрена не очевидна новым разрабам. Решение проблемы гениально простое: пиши код так, чтобы он был, сука, очевидным. В этой главе мы обсосем факторы, которые делают код либо понятным, либо загадкой от Жака Фреско.
 
-“Obvious” is in the mind of the reader: it’s easier to notice that someone else’s code is nonobvious than to see problems with your own code. Thus, the best way to determine the obviousness of code is through code reviews. If someone reading your code says it’s not obvious, then it’s not obvious, no matter how clear it may seem to you. By trying to understand what made the code nonobvious, you will learn how to write better code in the future.
+Если код очевиден, это значит, что любой мимокрокодил может быстро пробежать его глазами, особо не напрягая извилины, и его первая догадка о том, что этот код делает, окажется верной. Если код очевиден, читателю не нужно тратить часы и нервные клетки, чтобы собрать в кучу всю инфу для работы. Если же код **не** очевиден, читатель тратит уйму времени и энергии, пытаясь врубиться в твой полет мысли. Это не только убивает продуктивность, но и плодит баги, потому что он всё равно поймет неправильно. Очевидному коду нужно меньше комментов, чем твоему макаронному монстру.
 
-## 18.1 Things that make code more obvious
+«Очевидность» — понятие субъективное, оно в голове у читателя. Заметить, что чужой код — мутная херня, гораздо проще, чем признать это в своем. Поэтому лучший способ проверить код на вшивость — это код-ревью. Если кто-то на ревью говорит, что твой код неочевиден — значит, он, блять, неочевиден, и плевать, насколько прозрачным он кажется тебе. Попытайся понять, что именно ввело коллегу в ступор, и в будущем ты, возможно, перестанешь писать как мудак.
 
-Two of the most important techniques for making code obvious have already been discussed in previous chapters. The first is choosing good names (Chapter 14). Precise and meaningful names clarify the behavior of the code and reduce the need for documentation. If a name is vague or ambiguous, then readers will have read through the code in order to deduce the meaning of the named entity; this is time-consuming and error-prone. The second technique is consistency (Chapter 17). If similar things are always done in similar ways, then readers can recognize patterns they have seen before and immediately draw (safe) conclusions without analyzing the code in detail.
+## **18.1 Вещи, которые делают код понятнее**
 
-Here are a few other general-purpose techniques for making code more obvious:
+Два главных приема мы уже обмусолили в прошлых главах, но повторение — мать учения.
+1.  **Выбор нормальных имен** (Глава 14). Точные и смысловые имена объясняют поведение кода лучше любой документации. Если имя переменной туманное или двусмысленное, читателю придется перерыть весь код, чтобы дедуктивным методом вычислить, что это за сущность. Это долго и чревато факапами.
+2.  **Согласованность** (Глава 17). Если похожие вещи делаются одинаково, читатель узнает паттерн и сразу делает (безопасные) выводы, не вчитываясь в каждую строчку.
 
-Judicious use of white space. The way code is formatted can impact how easy it is to understand. Consider the following parameter documentation, in which whitespace has been squeezed out:
+А вот тебе еще пачка техник, чтобы твой код не выглядел как шифровка:
+
+### **Грамотное использование пустого места (Whitespace)**
+
+Форматирование кода напрямую влияет на то, вытекут у читателя глаза или нет. Взгляни на эту доку к параметрам, из которой выдавили весь воздух, как из вакуумной упаковки:
 
 ```java
 /**
@@ -29,7 +35,7 @@ Judicious use of white space. The way code is formatted can impact how easy it i
  */
 ```
 
-It’s hard to see where the documentation for one parameter ends and the next begins. It’s not even obvious how many parameters there are, or what their names are. If a little whitespace is added, the structure suddenly becomes clear and the documentation is easier to scan:
+Хрен поймешь, где заканчивается описание одного параметра и начинается другое. Даже имена параметров сливаются в кашу. Но стоит добавить немного пробелов, и структура становится прозрачной, как слеза младенца:
 
 ```java
 /**
@@ -48,29 +54,28 @@ It’s hard to see where the documentation for one parameter ends and the next b
  */
 ```
 
-Blank lines are also useful to separate major blocks of code within a method, such as in the following example:
+Пустые строки также полезны, чтобы разбивать код внутри метода на логические блоки, как здесь:
 
 ```cpp
 void* Buffer::allocAux(size_t numBytes) {
-    //  Round up the length to a multiple of 8 bytes, to ensure alignment.
+    //  Округляем длину до кратного 8 байтам для выравнивания.
     uint32_t numBytes32 =  (downCast<uint32_t>(numBytes) + 7) & ~0x7;
     assert(numBytes32 != 0);
 
-    //  If there is enough memory at firstAvailable, use that. Work down
-    //  from the top, because this memory is guaranteed to be aligned
-    //  (memory at the bottom may have been used for variable-size chunks).
+    //  Если есть место в firstAvailable, юзаем его. Идем сверху вниз,
+    //  потому что эта память гарантированно выровнена.
     if  (availableLength >= numBytes32) {
         availableLength -= numBytes32;
         return firstAvailable + availableLength;
     }
 
-    //  Next, see if there is extra space at the end of the last chunk.
+    //  Далее, смотрим, есть ли место в конце последнего чанка.
     if  (extraAppendBytes >= numBytes32) {
         extraAppendBytes -= numBytes32;
         return lastChunk->data + lastChunk->length + extraAppendBytes;
     }
 
-    //  Must create a new space allocation; allocate space within it.
+    //  Ну всё, пиздец, надо выделять новую память.
     uint32_t allocatedLength;
     firstAvailable = getNewAllocation(numBytes32, &allocatedLength);
     availableLength = allocatedLength numBytes32;
@@ -78,55 +83,55 @@ void* Buffer::allocAux(size_t numBytes) {
 }
 ```
 
-This approach works particularly well if the first line after each blank line is a comment describing the next block of code: the blank lines make the comments more visible.
+Этот подход работает особенно заебись, если первая строка после пустого места — это коммент, описывающий следующий блок. Пустые строки делают комменты заметнее.
 
-White space within a statement helps to clarify the structure of the statement. Compare the following two statements, one of which has whitespace and one of which doesn’t:
+Пробелы внутри строки кода тоже помогают понять, что вообще происходит. Сравни два варианта (код курильщика vs код здорового человека):
 
 ```java
-for(int pass=1;pass>=0&&!empty;pass--) {
+for(int pass=1;pass>=0&&!empty;pass--) { // Ужас эпилептика
 
-for (int pass = 1; pass >= 0 && !empty; pass--) {
+for (int pass = 1; pass >= 0 && !empty; pass--) { // Нормально же общались
 ```
 
-Comments. Sometimes it isn’t possible to avoid code that is nonobvious. When this happens, it’s important to use comments to compensate by providing the missing information. To do this well, you must put yourself in the position of the reader and figure out what is likely to confuse them, and what information will clear up that confusion. The next section shows a few examples.
+**Комментарии.** Иногда написать очевидный код тупо невозможно. Бывает. В таких случаях юзай комменты, чтобы компенсировать свою беспомощность и дать недостающую инфу. Чтобы сделать это нормально, поставь себя на место читателя: подумай, где он затупит, и объясни именно это.
 
-## 18.2 Things that make code less obvious
+## **18.2 Вещи, которые делают код мутным говном**
 
-There are many things that can make code nonobvious; this section provides a few examples. Some of these, such as event-driven programming, are useful in some situations, so you may end up using them anyway. When this happens, extra documentation can help to minimize reader confusion.
+Способов запутать код — миллион. Вот лишь некоторые примеры. Некоторые из них (например, событийка) иногда нужны, но тогда будь добр обмазаться документацией, чтобы минимизировать боль.
 
-Event-driven programming. In event-driven programming, an application responds to external occurrences, such as the arrival of a network packet or the press of a mouse button. One module is responsible for reporting incoming events. Other parts of the application register interest in certain events by asking the event module to invoke a given function or method when those events occur.
+**Event-driven programming (Событийка).** В этой парадигме приложение реагирует на внешнюю херню: прилетел пакет, юзер ткнул мышкой и т.д. Один модуль орет, что событие случилось, другие подписываются и просят дернуть их методы.
 
-Event-driven programming makes it hard to follow the flow of control. The event handler functions are never invoked directly; they are invoked indirectly by the event module, typically using a function pointer or interface. Even if you find the point of invocation in the event module, it still isn’t possible to tell which specific function will be invoked: this will depend on which handlers were registered at runtime. Because of this, it’s hard to reason about event-driven code or convince yourself that it works.
+Событийное программирование превращает поток управления (flow of control) в адский квест. Функции-обработчики никогда не вызываются напрямую; их вызывает событийный движок, обычно через указатели или интерфейсы. Даже если ты найдешь место вызова в движке, ты хер угадаешь, какая именно функция сработает — это зависит от того, что там нарегали в рантайме. Из-за этого рассуждать о таком коде и быть уверенным, что он вообще работает — задача не для слабонервных.
 
-To compensate for this obscurity, use the interface comment for each handler function to indicate when it is invoked, as in this example:
+Чтобы компенсировать эту муть, пиши в комментах к интерфейсу обработчика, когда и кто его, сука, вызывает:
 
 ```java
 /**
- * This method is invoked in the dispatch thread by a transport if a
- * transport-level error prevents an RPC from completing.
+ * Этот метод вызывается в потоке диспетчера транспортом, если
+ * ошибка уровня транспорта не дает RPC завершиться.
  */
 void Transport::RpcNotifier::failed() {
     ...
 }
 ```
 
-img Red Flag: Nonobvious Code img
+> **🚩 КРАСНЫЙ ФЛАГ: Неочевидный код**
+>
+> Если смысл и поведение кода нельзя понять быстрым взглядом — это красный флаг. Обычно это значит, что есть важная инфа, которая скрыта от глаз читателя.
 
-If the meaning and behavior of code cannot be understood with a quick reading, it is a red flag. Often this means that there is important information that is not immediately clear to someone reading the code.
-
-Generic containers. Many languages provide generic classes for grouping two or more items into a single object, such as Pair in Java or std::pair in C++. These classes are tempting because they make it easy to pass around several objects with a single variable. One of the most common uses is to return multiple values from a method, as in this Java example:
+**Дженерики-контейнеры (Generic containers).** Многие языки дают нам универсальные классы, чтобы свалить два и более куска данных в одну кучу, типа `Pair` в Java или `std::pair` в C++. Соблазн велик: можно передать пачку объектов одной переменной, не создавая новый класс. Часто так возвращают несколько значений из метода:
 
 ```java
 return new Pair<Integer, Boolean>(currentTerm, false);
 ```
 
-Unfortunately, generic containers result in nonobvious code because the grouped elements have generic names that obscure their meaning. In the example above, the caller must reference the two returned values with result.getKey() and result.getValue(), which give no clue about the actual meaning of the values.
+К сожалению, такие контейнеры делают код неочевидным, потому что у элементов внутри общие, ничего не значащие имена. В примере выше вызывающий код будет дергать `result.getKey()` и `result.getValue()`. Что такое `Key`? Что такое `Value`? Хуй проссышь.
 
-Thus, it’s better not to use generic containers. If you need a container, define a new class or structure that is specialized for the particular use. You can then use meaningful names for the elements, and you can provide additional documentation in the declaration, which is not possible with the generic container.
+Короче, не юзай дженерик-контейнеры. Если тебе нужно вернуть два значения, не ленись, создай под это дело маленький класс или структуру. Там ты сможешь дать полям нормальные имена, и, о чудо, код станет читаемым.
 
-This example illustrates a general rule: software should be designed for ease of reading, not ease of writing. Generic containers are expedient for the person writing the code, but they create confusion for all the readers that follow. It’s better for the person writing the code to spend a few extra minutes to define a specific container structure, so that the resulting code is more obvious.
+Этот пример иллюстрирует золотое правило: **софт должен быть спроектирован так, чтобы его было легко читать, а не легко писать.** Дженерики удобны для писателя (сэкономил 2 минуты), но создают геморрой для всех читателей в будущем. Лучше потрать пару минут сейчас, чтобы потом тебя не поминали лихом.
 
-Different types for declaration and allocation. Consider the following Java example:
+**Разные типы при объявлении и аллокации.** Зацени Java-код:
 
 ```java
 private List<Message> incomingMessageList;
@@ -134,9 +139,9 @@ private List<Message> incomingMessageList;
 incomingMessageList = new ArrayList<Message>();
 ```
 
-The variable is declared as a List, but the actual value is an ArrayList. This code is legal, since List is a superclass of ArrayList, but it can mislead a reader who sees the declaration but not the actual allocation. The actual type may impact how the variable is used (ArrayLists have different performance and thread-safety properties than other subclasses of List), so it is better to match the declaration with the allocation.
+Переменная объявлена как `List`, но по факту там `ArrayList`. Это легально (полиморфизм, все дела), но может сбить с толку читателя, который видит только объявление. Реальный тип может влиять на использование (у `ArrayList` своя производительность и приколы с потокобезопасностью), так что лучше не путать следы и матчить объявление с аллокацией.
 
-Code that violates reader expectations. Consider the following code, which is the main program for a Java application
+**Код, который нарушает ожидания.** Представь `main` функцию Java-приложения:
 
 ```java
 public static void main(String[] args) {
@@ -145,10 +150,13 @@ public static void main(String[] args) {
 }
 ```
 
-Most applications exit when their main programs return, so readers are likely to assume that will happen here. However, that is not the case. The constructor for RaftClient creates additional threads, which continue to operate even though the application’s main thread finishes. This behavior should be documented in the interface comment for the RaftClient constructor, but the behavior is nonobvious enough that it’s worth putting a short comment at the end of main as well. The comment should indicate that the application will continue executing in other threads. Code is most obvious if it conforms to the conventions that readers will be expecting; if it doesn’t, then it’s important to document the behavior so readers aren’t confused.
+Большинство программ закрываются, когда `main` завершается. Читатель ожидает именно этого. Но тут — сюрприз, мазафака! Конструктор `RaftClient` создает дополнительные потоки, которые продолжают молотить даже после выхода из `main`. Такое поведение надо документировать жирным шрифтом в `RaftClient`, но оно настолько неочевидно, что стоит добавить коммент и в конец `main`. Напиши прямым текстом: "Приложение не сдохнет, оно будет жить в других потоках". Код очевиден тогда, когда он соответствует ожиданиям; если нет — пиши объяснительную.
 
-## 18.3 Conclusion
+## **18.3 Итоги**
 
-Another way of thinking about obviousness is in terms of information. If code is nonobvious, that usually means there is important information about the code that the reader does not have: in the RaftClient example, the reader might not know that the RaftClient constructor created new threads; in the Pair example, the reader might not know that result.getKey() returns the number of the current term.
+Думай об очевидности в терминах **информации**. Если код неочевиден, значит, читателю не хватает какой-то важной инфы: в примере с `RaftClient` он не знал про скрытые потоки; в примере с `Pair` он не знал, что `getKey()` возвращает номер текущего терма.
 
-To make code obvious, you must ensure that readers always have the information they need to understand it. You can do this in three ways. The best way is to reduce the amount of information that is needed, using design techniques such as abstraction and eliminating special cases. Second, you can take advantage of information that readers have already acquired in other contexts (for example, by following conventions and conforming to expectations) so readers don’t have to learn new information for your code. Third, you can present the important information to them in the code, using techniques such as good names and strategic comments.
+Чтобы код был очевидным, убедись, что у читателя всегда есть всё необходимое для понимания.
+1.  **Лучший способ:** Уменьши количество необходимой инфы (абстракция, удаление спец-кейсов). Чем меньше надо знать, тем проще жить.
+2.  **Второй способ:** Используй знания, которые у читателя уже есть (следуй конвенциям, не изобретай велосипед), чтобы ему не пришлось учить новую херню ради твоего кода.
+3.  **Третий способ:** Если уж инфа нужна, преподнеси её на блюдечке прямо в коде — через нормальные имена и стратегические комменты.
